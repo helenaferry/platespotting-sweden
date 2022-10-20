@@ -9,14 +9,6 @@ const List: NextPage = () => {
     const session = useSession()
     const supabase = useSupabaseClient()
     let [spottings, setSpottings] = useState<SpottingType[] | null>(null);
-    let spottingsTableRows = spottings && spottings.map(function (spotting, index) {
-        return <tr key={index}>
-            <td><Plate plateNumber={spotting.plateNumber}></Plate></td>
-            <td>{spotting.dateSpotted}</td>
-            <td>{spotting.note}</td>
-            <td>{spotting.email}</td>
-        </tr>;
-    })
 
     useEffect(() => {
         const fetchData = async () => {
@@ -35,7 +27,6 @@ const List: NextPage = () => {
     return (
         <PageTemplate>
             <div>
-                <p>Här ska vi visa en lista...</p>
                 <table>
                     <thead>
                         <tr>
@@ -47,7 +38,14 @@ const List: NextPage = () => {
                     </thead>
                     <tbody>
                         {
-                            spottingsTableRows
+                            spottings && spottings.map(function (spotting, index) {
+                                return <tr key={index}>
+                                    <td><Plate plateNumber={spotting.plateNumber}></Plate></td>
+                                    <td>{spotting.dateSpotted}</td>
+                                    <td>{spotting.note}</td>
+                                    <td>{spotting.email}</td>
+                                </tr>
+                            })
                         }
                     </tbody>
                 </table>
