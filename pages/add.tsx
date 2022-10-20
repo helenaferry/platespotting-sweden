@@ -1,12 +1,14 @@
 import type { NextPage } from 'next'
-import PageTemplate from "./../components/page-template/PageTemplate"
+import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
+import Head from 'next/head'
+import PageTemplate from "./../components/page-template/PageTemplate"
 import Plate from './../components/plate/Plate'
-import Link from 'next/link'
 
-const Home: NextPage = () => {
+const Add: NextPage = () => {
   const session = useSession()
   const supabase = useSupabaseClient()
+
 
   async function addSpotting() {
     const { data, error } = await supabase
@@ -18,15 +20,15 @@ const Home: NextPage = () => {
   }
 
   return (
-    <PageTemplate>
-      <section className="text-center">
-        <p>Du letar efter:</p>
-        <Plate plateNumber={'123'}></Plate><br />
-        <Link href="/add">
-          <a className="btn-primary">Hittad!</a>
-        </Link>
-      </section>
-    </PageTemplate>
+    <div>
+
+          <PageTemplate>
+            <button onClick={addSpotting} className="btn-primary">
+              Add
+            </button>
+          </PageTemplate>
+
+    </div>
   )
 }
-export default Home
+export default Add
