@@ -16,7 +16,7 @@ export default function PageTemplate(props: Props) {
         const { error } = await supabase.auth.signOut()
     }
 
-    return <div className="w-screen bg-slate-100"><div className="mx-auto h-screen bg-white p-5" style={{ maxWidth: "720px" }}>
+    return <div className="w-screen min-h-full bg-slate-100"><div className="mx-auto h-screen bg-white p-5" style={{ maxWidth: "720px" }}>
         <Head>
             <title>Platespotting Sweden</title>
             <meta name="description" content="Platespotting Sweden" />
@@ -57,7 +57,5 @@ export default function PageTemplate(props: Props) {
                 <div>{props.children}</div>
             )}
         </main>
-
     </div></div>
-
 }
