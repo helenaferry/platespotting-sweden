@@ -1,23 +1,41 @@
 
 import { SpottingType } from './../../types/SpottingType'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router'
+import Plate from './../plate/Plate'
 const AddForm: React.FunctionComponent = () => {
     const session = useSession()
     const supabase = useSupabaseClient()
     const router = useRouter()
     const todayString = getTodayString();
     const [note, setNote] = useState("")
-    const [plateNumber, setPlateNumber] = useState("")
     const [date, setDate] = useState(todayString)
+    let [spottings, setSpottings] = useState<SpottingType[] | null>(null);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            let { data: spottings, error } = await supabase
+                .from('spottings')
+                .select('*')
+            let s = spottings as SpottingType[];
+            setSpottings(s);
+        }
+        fetchData()
+            .catch(console.error);
+    }, [supabase]);
+
+  function nextPlate() {
+    let latest = spottings && spottings.reduce((x, y) => x > y ? x : y, { plateNumber: '000'})
+    if (latest && latest.plateNumber != '000') {
+      let number = parseInt(latest.plateNumber);
+      return String(number + 1).padStart(3, '0');
+    } else {
+      return '001';
+    }
+  }
     const onChangeNote = (event: any) => {
         setNote(event.target.value)
-    }
-
-    const onChangePlateNumber = (event: any) => {
-        setPlateNumber(event.target.value)
     }
 
     const onChangeDate = (event: any) => {
@@ -43,10 +61,9 @@ const AddForm: React.FunctionComponent = () => {
         const { data, error } = await supabase
             .from('spottings')
             .insert(
-                { plateNumber: plateNumber, dateSpotted: date, note: note, email: session?.user.email }
-            )       
+                { plateNumber: nextPlate(), dateSpotted: date, note: note, email: session?.user.email }
+            )
         if (!error) {
-            console.log('joråsåatteh')
             router.push('/list')
         } else {
             console.log(error)
@@ -55,8 +72,7 @@ const AddForm: React.FunctionComponent = () => {
 
     return (
         <form onSubmit={onSubmit} className="flex flex-col">
-            <label htmlFor="plateNumber">Nummer</label>
-            <input type="text" name="plateNumber" onChange={onChangePlateNumber} className="border block mb-4" />
+            <Plate plateNumber={nextPlate()} />
             <label htmlFor="date">Datum</label>
             <input type="date" name="date" onChange={onChangeDate} value={todayString} className="border block mb-4" />
             <label htmlFor="note">Anteckning</label>

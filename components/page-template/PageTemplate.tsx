@@ -54,7 +54,7 @@ export default function PageTemplate(props: Props) {
                     theme="light"
                 />
             ) : (
-                <div>{props.children}</div>
+                <div className="w-11/12">{props.children}</div>
             )}
         </main>
     </div></div>
