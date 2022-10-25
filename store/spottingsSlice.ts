@@ -1,7 +1,7 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from './store'
 import { SpottingType } from '../types/SpottingType'
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
+import { useSupabaseClient } from '@supabase/auth-helpers-react'
 
 interface SpottingsState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed',
@@ -18,7 +18,7 @@ const initialState: SpottingsState = {
 }
 
 export const fetchSpottings = createAsyncThunk('spottings/fetchSpottings', async () => {
-        let { data: spottings, error } = await useSupabaseClient()
+    let { data: spottings, error } = await useSupabaseClient()
         .from('spottings')
         .select('*')
         .order('plateNumber', { ascending: false })
@@ -26,30 +26,33 @@ export const fetchSpottings = createAsyncThunk('spottings/fetchSpottings', async
     return spottings;
 })
 
-export const addNewSpotting = createAsyncThunk(
+/* export const addNewSpotting = createAsyncThunk(
     'spottings/addNewSpotting',
-    async spotting => {
-        const response = await useSupabaseClient()
-            .from('spottings')
-            .insert(spotting)
-        console.log('addNewSpotting', response);
-        return response.data
-    })
+    async (spotting: SpottingType) => {
+     const supabase = useSupabaseClient()
+         console.log('thunk says hi', spotting)
+         const response = await supabase
+             .from('spottings')
+             .insert(spotting)
+         console.log('addNewSpotting', response)
+         return response.data
+        return spotting;
+    }) */
 
 export const spottingsSlice = createSlice({
     name: 'spottings',
     initialState,
     reducers: {
-       /* setSpottings: (state) => {
-            state.spottings = []
-        } */
+        /* setSpottings: (state) => {
+             state.spottings = []
+         } */
     },
     extraReducers(builder) {
         builder
             .addCase(fetchSpottings.pending, (state, action) => {
                 state.status = 'loading'
             })
-            .addCase(fetchSpottings.fulfilled, (state, action) => {
+            .addCase(fetchSpottings.fulfilled, (state, action: PayloadAction<any>) => {
                 state.status = 'succeeded'
                 console.log('FETCHED', action.payload);
                 state.spottings = state.spottings.concat(action.payload)
@@ -57,11 +60,19 @@ export const spottingsSlice = createSlice({
             .addCase(fetchSpottings.rejected, (state, action) => {
                 state.status = 'failed'
                 state.error = action.error.message || ''
+                console.log(state.status, state.error);
             })
-            .addCase(addNewSpotting.fulfilled, (state, action) => {
-                console.log('addNewSpotting fulfilled');
+            /*
+            .addCase(addNewSpotting.pending, (state, action) => {
+                console.log('add new spotting PENDING');
+            })
+            .addCase(addNewSpotting.fulfilled, (state, action: PayloadAction<any>) => {
+                console.log('addNewSpotting FULFILLED');
                 state.spottings.push(action.payload)
             })
+            .addCase(addNewSpotting.rejected, (state, action) => {
+                console.log('add new spotting REJECTED', action.error.message);
+            })*/
     }
 })
 
@@ -71,7 +82,7 @@ export const spottingsSlice = createSlice({
 // export const selectCount = (state: RootState) => state.counter.value
 
 export const selectNextPlate = (state: RootState) => {
-    let latest =  state.spottings.spottings[0] // state.spottings.spottings && state.spottings.spottings.reduce((x, y) => x.plateNumber > y.plateNumber ? x : y, { plateNumber: 0 })
+    let latest = state.spottings.spottings[0] // state.spottings.spottings && state.spottings.spottings.reduce((x, y) => x.plateNumber > y.plateNumber ? x : y, { plateNumber: 0 })
     if (latest && latest.plateNumber != 0) {
         return latest.plateNumber + 1
     } else {

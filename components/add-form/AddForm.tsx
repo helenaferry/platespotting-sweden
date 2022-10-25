@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import Plate from './../plate/Plate'
 import { useAppSelector, useAppDispatch } from './../../hooks'
 // import { useDispatch, useSelector } from 'react-redux'
-import { fetchSpottings, selectAllSpottings, selectNextPlate, addNewSpotting } from './../../store/spottingsSlice'
+import { fetchSpottings, selectAllSpottings, selectNextPlate } from './../../store/spottingsSlice'
 
 // const AddForm: React.FunctionComponent = () => {
 const AddForm = () => {
@@ -21,7 +21,7 @@ const AddForm = () => {
     // const spottings = useAppSelector(selectAllSpottings)
     const nextPlate = useAppSelector(selectNextPlate)
     // const status = useAppSelector(state => state.spottings.status)
-    // const supabase = useSupabaseClient()
+    const supabase = useSupabaseClient()
     const [addSpottingStatus, setAddSpottingStatus] = useState('idle')
 
     if (status === 'idle') {
@@ -54,18 +54,34 @@ const AddForm = () => {
     const canSave = addSpottingStatus === 'idle';
     // [plateNumber: nextPlate(), dateSpotted, note, email].every(Boolean) && addSpottingStatus === 'idle'
 
-    const addSpotting = async () => {
+  /*  const addSpotting1 = async () => {
         if (canSave) {
             console.log('allowed to save and will try?')
             try {
                 setAddSpottingStatus('pending')
-                await dispatch(addNewSpotting({ plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email })).unwrap()
+                await dispatch(addNewSpotting({ plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email, location_lat: '', location_lng: '', location_txt: '' }))
             } catch (err) {
                 console.error('Failed to save the spotting: ', err)
             } finally {
                 setAddSpottingStatus('idle')
+                console.log('finally')
                 // router.push('/list')
             }
+        }
+    }*/
+
+    async function addSpotting() {
+        // dispatch(addNewSpotting({ plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email, location_lat: '', location_lng: '', location_txt: '' }))
+        const { data, error } = await supabase
+            .from('spottings')
+            .insert(
+                { plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email }
+            )
+        if (!error) {
+            // dispatch(fetchSpottings())
+            // router.push('/list')
+        } else {
+            console.log(error)
         }
     }
     /*
@@ -84,7 +100,7 @@ console.log(error)
 
     return (
         <form onSubmit={onSubmit} className="flex flex-col">
-            <p>OBS! Funkar inte för tillfället :)</p>
+            <p className="text-2xl text-red-500">OBS! Funkar inte för tillfället :)</p>
             <Plate plateNumber={nextPlate} />
             <label htmlFor="date">Datum</label>
             <input type="date" name="date" onChange={onChangeDate} value={todayString} className="border block mb-4" />
