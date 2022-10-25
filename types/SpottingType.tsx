@@ -1,7 +1,7 @@
 export type SpottingType = {
     id: Number,
     created_at: string,
-    plateNumber: string,
+    plateNumber: number,
     location_lat: string,
     location_lng: string,
     location_txt: string,

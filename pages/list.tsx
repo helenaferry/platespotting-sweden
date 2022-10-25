@@ -1,36 +1,18 @@
 import type { NextPage } from 'next'
-import { SpottingType } from './../types/SpottingType'
-import { useEffect, useState } from "react";
 import PageTemplate from "./../components/page-template/PageTemplate"
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import Plate from './../components/plate/Plate'
+import { useAppSelector, useAppDispatch } from './../hooks'
+import { fetchSpottings, selectAllSpottings, selectNextPlate } from '../store/spottingsSlice'
+
 
 const List: NextPage = () => {
-    const session = useSession()
-    const supabase = useSupabaseClient()
-    let [spottings, setSpottings] = useState<SpottingType[] | null>(null);
+  const dispatch = useAppDispatch()
+  const spottings = useAppSelector(selectAllSpottings)
+  const status = useAppSelector(state => state.spottings.status)
 
-    useEffect(() => {
-        const fetchData = async () => {
-            let { data: spottings, error } = await supabase
-                .from('spottings')
-                .select('*')
-            let s = spottings as SpottingType[];
-            setSpottings(s);
-        }
-        fetchData()
-            .catch(console.error);
-    }, [supabase]);
-
-    function nextPlate() {
-        let latest = spottings && spottings.reduce((x, y) => x > y ? x : y, { plateNumber: '000' })
-        if (latest && latest.plateNumber != '000') {
-            let number = parseInt(latest.plateNumber);
-            return String(number + 1).padStart(3, '0');
-        } else {
-            return '001';
-        }
-    }
+  if (status === 'idle') {
+    dispatch(fetchSpottings())
+  }
 
     return (
         <PageTemplate>

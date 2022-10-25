@@ -4,36 +4,30 @@ import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router'
 import Plate from './../plate/Plate'
-const AddForm: React.FunctionComponent = () => {
+import { useAppSelector, useAppDispatch } from './../../hooks'
+// import { useDispatch, useSelector } from 'react-redux'
+import { fetchSpottings, selectAllSpottings, selectNextPlate, addNewSpotting } from './../../store/spottingsSlice'
+
+// const AddForm: React.FunctionComponent = () => {
+const AddForm = () => {
     const session = useSession()
-    const supabase = useSupabaseClient()
-    const router = useRouter()
-    const todayString = getTodayString();
+    //const router = useRouter()
+    const todayString = getTodayString()
     const [note, setNote] = useState("")
     const [date, setDate] = useState(todayString)
-    let [spottings, setSpottings] = useState<SpottingType[] | null>(null);
+    const dispatch = useAppDispatch()
+    // const dispatch = useDispatch()
+    // const error = useAppSelector(state => state.spottings.error)
+    // const spottings = useAppSelector(selectAllSpottings)
+    const nextPlate = useAppSelector(selectNextPlate)
+    // const status = useAppSelector(state => state.spottings.status)
+    // const supabase = useSupabaseClient()
+    const [addSpottingStatus, setAddSpottingStatus] = useState('idle')
 
-    useEffect(() => {
-        const fetchData = async () => {
-            let { data: spottings, error } = await supabase
-                .from('spottings')
-                .select('*')
-            let s = spottings as SpottingType[];
-            setSpottings(s);
-        }
-        fetchData()
-            .catch(console.error);
-    }, [supabase]);
-
-  function nextPlate() {
-    let latest = spottings && spottings.reduce((x, y) => x > y ? x : y, { plateNumber: '000'})
-    if (latest && latest.plateNumber != '000') {
-      let number = parseInt(latest.plateNumber);
-      return String(number + 1).padStart(3, '0');
-    } else {
-      return '001';
+    if (status === 'idle') {
+        dispatch(fetchSpottings())
     }
-  }
+
     const onChangeNote = (event: any) => {
         setNote(event.target.value)
     }
@@ -44,7 +38,7 @@ const AddForm: React.FunctionComponent = () => {
 
     const onSubmit = (event: any) => {
         event.preventDefault()
-        addSpotting()
+        addSpotting();
     }
 
     function getTodayString() {
@@ -57,27 +51,46 @@ const AddForm: React.FunctionComponent = () => {
         return year + '-' + monthString + '-' + dayString;
     }
 
-    async function addSpotting() {
-        const { data, error } = await supabase
-            .from('spottings')
-            .insert(
-                { plateNumber: nextPlate(), dateSpotted: date, note: note, email: session?.user.email }
-            )
-        if (!error) {
-            router.push('/list')
-        } else {
-            console.log(error)
+    const canSave = addSpottingStatus === 'idle';
+    // [plateNumber: nextPlate(), dateSpotted, note, email].every(Boolean) && addSpottingStatus === 'idle'
+
+    const addSpotting = async () => {
+        if (canSave) {
+            console.log('allowed to save and will try?')
+            try {
+                setAddSpottingStatus('pending')
+                await dispatch(addNewSpotting({ plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email })).unwrap()
+            } catch (err) {
+                console.error('Failed to save the spotting: ', err)
+            } finally {
+                setAddSpottingStatus('idle')
+                // router.push('/list')
+            }
         }
     }
+    /*
+const { data, error } = await supabase
+.from('spottings')
+.insert(
+    { plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email }
+)
+if (!error) {
+dispatch(fetchSpottings())
+router.push('/list')
+} else {
+console.log(error)
+}*/
+
 
     return (
         <form onSubmit={onSubmit} className="flex flex-col">
-            <Plate plateNumber={nextPlate()} />
+            <p>OBS! Funkar inte för tillfället :)</p>
+            <Plate plateNumber={nextPlate} />
             <label htmlFor="date">Datum</label>
             <input type="date" name="date" onChange={onChangeDate} value={todayString} className="border block mb-4" />
             <label htmlFor="note">Anteckning</label>
             <textarea name="note" onChange={onChangeNote} className="border block mb-4" />
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="btn-primary" disabled={!canSave}>
                 Spara
             </button>
         </form>

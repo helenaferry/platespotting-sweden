@@ -1,3 +1,3 @@
 export type PlateType = {
-  plateNumber: string
+  plateNumber: number
 }
