@@ -1,10 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit'
-//import counterReducer from './counterSlice'
 import spottingsReducer from './spottingsSlice'
 
 const store = configureStore({
     reducer: {
-        //counter: counterReducer,
         spottings: spottingsReducer
     },
 })

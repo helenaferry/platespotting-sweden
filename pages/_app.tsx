@@ -15,7 +15,6 @@ function MyApp({
   const [supabaseClient] = useState(() => createBrowserSupabaseClient())
 
   return (
-
     <SessionContextProvider
       supabaseClient={supabaseClient}
       initialSession={pageProps.initialSession}

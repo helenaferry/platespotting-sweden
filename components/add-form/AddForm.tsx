@@ -1,32 +1,22 @@
 
-import { SpottingType } from './../../types/SpottingType'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router'
 import Plate from './../plate/Plate'
 import { useAppSelector, useAppDispatch } from './../../hooks'
-// import { useDispatch, useSelector } from 'react-redux'
-import { fetchSpottings, selectAllSpottings, selectNextPlate } from './../../store/spottingsSlice'
+import { selectNextPlate, addNewSpotting } from './../../store/spottingsSlice'
 
-// const AddForm: React.FunctionComponent = () => {
-const AddForm = () => {
+const AddForm: React.FunctionComponent = () => {
     const session = useSession()
-    //const router = useRouter()
+    const router = useRouter()
     const todayString = getTodayString()
     const [note, setNote] = useState("")
     const [date, setDate] = useState(todayString)
     const dispatch = useAppDispatch()
-    // const dispatch = useDispatch()
-    // const error = useAppSelector(state => state.spottings.error)
-    // const spottings = useAppSelector(selectAllSpottings)
     const nextPlate = useAppSelector(selectNextPlate)
-    // const status = useAppSelector(state => state.spottings.status)
+    const status = useAppSelector(state => state.spottings.status)
     const supabase = useSupabaseClient()
     const [addSpottingStatus, setAddSpottingStatus] = useState('idle')
-
-    if (status === 'idle') {
-        dispatch(fetchSpottings())
-    }
 
     const onChangeNote = (event: any) => {
         setNote(event.target.value)
@@ -38,7 +28,7 @@ const AddForm = () => {
 
     const onSubmit = (event: any) => {
         event.preventDefault()
-        addSpotting();
+        addSpotting()
     }
 
     function getTodayString() {
@@ -52,55 +42,42 @@ const AddForm = () => {
     }
 
     const canSave = addSpottingStatus === 'idle';
-    // [plateNumber: nextPlate(), dateSpotted, note, email].every(Boolean) && addSpottingStatus === 'idle'
 
-  /*  const addSpotting1 = async () => {
-        if (canSave) {
-            console.log('allowed to save and will try?')
-            try {
-                setAddSpottingStatus('pending')
-                await dispatch(addNewSpotting({ plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email, location_lat: '', location_lng: '', location_txt: '' }))
-            } catch (err) {
-                console.error('Failed to save the spotting: ', err)
-            } finally {
-                setAddSpottingStatus('idle')
-                console.log('finally')
-                // router.push('/list')
-            }
-        }
-    }*/
+    const addSpotting1 = async () => {
+          if (canSave) {
+              console.log('allowed to save and will try?')
+              try {
+                  setAddSpottingStatus('pending')
+                  await dispatch(addNewSpotting({ plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email, location_lat: '', location_lng: '', location_txt: '' }))
+              } catch (err) {
+                  console.error('Failed to save the spotting: ', err)
+              } finally {
+                  setAddSpottingStatus('idle')
+                  console.log('finally')
+                  router.push('/list')
+              }
+          }
+      }
 
     async function addSpotting() {
-        // dispatch(addNewSpotting({ plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email, location_lat: '', location_lng: '', location_txt: '' }))
-        const { data, error } = await supabase
-            .from('spottings')
-            .insert(
-                { plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email }
-            )
-        if (!error) {
-            // dispatch(fetchSpottings())
-            // router.push('/list')
-        } else {
-            console.log(error)
+        if (canSave) {
+            setAddSpottingStatus('pending')
+            const { data, error } = await supabase
+                .from('spottings')
+                .insert(
+                    { plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email }
+                )
+            if (!error) {
+                router.push('/list')  
+            } else {
+                console.log(error)
+            }
+            setAddSpottingStatus('idle')
         }
     }
-    /*
-const { data, error } = await supabase
-.from('spottings')
-.insert(
-    { plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email }
-)
-if (!error) {
-dispatch(fetchSpottings())
-router.push('/list')
-} else {
-console.log(error)
-}*/
 
-
-    return (
+    return (status == 'succeeded' ?
         <form onSubmit={onSubmit} className="flex flex-col">
-            <p className="text-2xl text-red-500">OBS! Funkar inte för tillfället :)</p>
             <Plate plateNumber={nextPlate} />
             <label htmlFor="date">Datum</label>
             <input type="date" name="date" onChange={onChangeDate} value={todayString} className="border block mb-4" />
@@ -110,6 +87,7 @@ console.log(error)
                 Spara
             </button>
         </form>
+        : status == 'failed' ? <p>Något gick fel</p> : <p>Laddar...</p>
     )
 }
 export default AddForm;

@@ -1,6 +1,8 @@
 import React, { ReactNode } from 'react'
 import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
+import { useAppSelector, useAppDispatch } from './../../hooks'
+import { addSpotting, fetchSpottings } from './../../store/spottingsSlice'
 import Head from 'next/head'
 import Link from 'next/link'
 
@@ -11,6 +13,20 @@ type Props = {
 export default function PageTemplate(props: Props) {
     const session = useSession()
     const supabase = useSupabaseClient()
+    const error = useAppSelector(state => state.spottings.error)
+    const status = useAppSelector(state => state.spottings.status)
+    const dispatch = useAppDispatch()
+
+    if (status === 'idle') {
+        dispatch(fetchSpottings())
+    }
+
+    supabase
+        .channel('*')
+        .on('postgres_changes', { event: '*', schema: '*' }, payload => {
+            dispatch(addSpotting(payload.new))
+        })
+        .subscribe()
 
     async function signOut() {
         const { error } = await supabase.auth.signOut()
@@ -29,6 +45,7 @@ export default function PageTemplate(props: Props) {
             <h1 className="pt-10 text-2xl">
                 Platespotting Sverige
             </h1>
+            {error && <p>Fel: {error}</p>}
             {session &&
                 <nav className="m-3">
                     <Link href="/">
@@ -54,7 +71,9 @@ export default function PageTemplate(props: Props) {
                     theme="light"
                 />
             ) : (
-                <div className="w-11/12">{props.children}</div>
+                <div className="w-11/12">
+                    {props.children}
+                </div>
             )}
         </main>
     </div></div>
