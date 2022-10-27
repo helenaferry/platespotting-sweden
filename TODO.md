@@ -1,0 +1,6 @@
+- UNIQUE on plateNumber in db table? Don't want duplicates to be added.
+- Mobile friendly
+- Add Leaflet
+- Add team members
+- Right now previous user's data is shown initially on login with another user...
+- Figure out why I can't add with my Redux async thunk...
