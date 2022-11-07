@@ -4,9 +4,14 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router'
 import Plate from './../plate/Plate'
 import { LocationType } from './../../types/LocationType'
-import LocationSelectorMap from './../location-selector-map/LocationSelectorMap.js'
+// import LocationSelectorMap from './../location-selector-map/LocationSelectorMap.js'
 import { useAppSelector, useAppDispatch } from './../../hooks'
 import { selectNextPlate, addNewSpotting } from './../../store/spottingsSlice'
+
+import dynamic from "next/dynamic"
+
+const LocationSelectorMap = dynamic(() => import("./../location-selector-map/LocationSelectorMap.js"), { ssr:false })
+
 
 const AddForm: React.FunctionComponent = () => {
     const session = useSession()
@@ -91,6 +96,7 @@ const AddForm: React.FunctionComponent = () => {
             <label htmlFor="date">Datum</label>
             <input type="date" name="date" onChange={onChangeDate} value={todayString} className="border block mb-4" />
             <LocationSelectorMap updateLocation={updateLocationHandler} />
+            Hmmm, the draggability WAS working just fine...
             <label htmlFor="lat">Latitud</label>
             <input name="lat" type="text" value={location_lat} readOnly className="border block mb-4"></input>
             <label htmlFor="lng">Longitud</label>
