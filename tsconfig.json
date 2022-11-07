@@ -15,6 +15,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "components/location-selector-map/LocationSelectorMap.js", "components/location-selector-map/LocationSelectorMap.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "components/location-selector-map/LocationSelectorMap.js", "components/location-selector-map/LocationSelectorMap.js", "pages/_document.js", "pages/_document.js"],
   "exclude": ["node_modules"]
 }
