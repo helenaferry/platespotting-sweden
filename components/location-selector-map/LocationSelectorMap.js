@@ -62,12 +62,17 @@ export default function LocationSelectorMap(props) {
   function LeafletgeoSearch() {
     const map = useMap();
     useEffect(() => {
-      const provider = new OpenStreetMapProvider();
+      const provider = new OpenStreetMapProvider({
+        params: {
+          countrycodes: "se"
+        }
+      });
 
       const searchControl = new GeoSearchControl({
         provider,
         style: 'bar',
-        showMarker: false
+        showMarker: false,
+        searchLabel: 'Sök adress eller plats'
       });
 
       map.addControl(searchControl);
