@@ -96,7 +96,6 @@ const AddForm: React.FunctionComponent = () => {
             <label htmlFor="date">Datum</label>
             <input type="date" name="date" onChange={onChangeDate} value={todayString} className="border block mb-4" />
             <LocationSelectorMap updateLocation={updateLocationHandler} />
-            Hmmm, the draggability WAS working just fine...
             <label htmlFor="lat">Latitud</label>
             <input name="lat" type="text" value={location_lat} readOnly className="border block mb-4"></input>
             <label htmlFor="lng">Longitud</label>

@@ -8,13 +8,13 @@ export default function LocationSelectorMap(props) {
   const center = {
     lat: 0,
     lng: 0,
-  } 
+  }
   const [position, setPosition] = useState(center)
   const [locationSet, setLocationSet] = useState(false)
 
   useEffect(() => {
     //do we support geolocation
-    if (!("geolocation" in navigator)) {
+    if (!("geolocation" in navigator) || locationSet) {
       return;
     }
     // get position
@@ -24,11 +24,11 @@ export default function LocationSelectorMap(props) {
           lat: pos.coords.latitude,
           lng: pos.coords.longitude
         })
-        props.updateLocation({lat: pos.coords.latitude, lng: pos.coords.longitude })
+        props.updateLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
         setLocationSet(true)
       }
     );
-  }, [position, props])
+  })
 
 
   function DraggableMarker() {
@@ -56,13 +56,13 @@ export default function LocationSelectorMap(props) {
     )
   }
 
-  return (locationSet ? <MapContainer className="h-96 border" center={position} zoom={15} scrollWheelZoom={true}>
+  return (<div className="h-96 border">{locationSet ? <MapContainer className="h-96" center={position} zoom={17} scrollWheelZoom={true}>
     <TileLayer
       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
     />
     <DraggableMarker />
   </MapContainer>
-  : <p>Kartan fungerar inte i denna webbläsare. Har du gett den tillåtelse att hämta din position?</p>
-  );
+    : <p>Väntar på kartan... Har du gett tillåtelse i webbläsaren att läsa position?</p>
+  }</div>);
 }

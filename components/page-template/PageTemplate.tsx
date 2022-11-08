@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useEffect } from 'react'
 import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useAppSelector, useAppDispatch } from './../../hooks'
@@ -30,6 +30,7 @@ export default function PageTemplate(props: Props) {
 
     async function signOut() {
         const { error } = await supabase.auth.signOut()
+        location.reload()
     }
 
     return <div className="w-screen min-h-full bg-slate-100"><div className="mx-auto min-h-screen bg-white p-5" style={{ maxWidth: "720px" }}>
