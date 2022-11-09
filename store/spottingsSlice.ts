@@ -73,6 +73,7 @@ export const spottingsSlice = createSlice({
     initialState,
     reducers: {
         addSpotting(state, action) {
+            console.log('add spotting', action.payload);
             state.spottings.unshift(action.payload)
         }
     },

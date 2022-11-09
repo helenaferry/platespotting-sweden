@@ -83,17 +83,24 @@ const AddForm: React.FunctionComponent = () => {
                     { plateNumber: nextPlate, dateSpotted: date, note: note, profile: session?.user.id, location_lat: location_lat, location_lng: location_lng }
                 )
                 .select('*')
-            if (!spottingError) {
-                router.push('/list')
-            } else {
+            if (spottingError) {
                 console.log(spottingError)
                 return;
             }
+            if (!membersSeen || membersSeen.length < 1 || membersSeen[0].length < 1) {
+                router.push('/list')
+                return;
+            }
             membersSeen.map(async member => {
-                const { data, error } = await supabase
+                const { data, error: tmError } = await supabase
                     .from('spottingTeamMembers')
                     .insert({ teamMember: member, spotting: spottingData[0].id, profile: session?.user.id })
+                if (tmError) {
+                    console.log(tmError);
+                    return;
+                }
             })
+            router.push('/list')
             setAddSpottingStatus('idle')
         }
     }
