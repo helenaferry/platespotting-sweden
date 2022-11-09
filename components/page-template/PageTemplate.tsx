@@ -2,7 +2,7 @@ import React, { ReactNode, useEffect } from 'react'
 import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useAppSelector, useAppDispatch } from './../../hooks'
-import { addSpotting, fetchSpottings } from './../../store/spottingsSlice'
+import { addSpotting, fetchSpottings, fetchTeamMembers, selectAllTeamMembers } from './../../store/spottingsSlice'
 import Head from 'next/head'
 import Link from 'next/link'
 
@@ -15,16 +15,25 @@ export default function PageTemplate(props: Props) {
     const supabase = useSupabaseClient()
     const error = useAppSelector(state => state.spottings.error)
     const status = useAppSelector(state => state.spottings.status)
+    const teamMemberStatus = useAppSelector(state => state.spottings.teamMemberStatus)
     const dispatch = useAppDispatch()
+
+    const teamMembers = useAppSelector(selectAllTeamMembers);
 
     if (status === 'idle') {
         dispatch(fetchSpottings())
     }
 
+    if (teamMemberStatus === 'idle') {
+        dispatch(fetchTeamMembers())
+    }
+
     supabase
         .channel('*')
         .on('postgres_changes', { event: '*', schema: '*' }, payload => {
-            dispatch(addSpotting(payload.new))
+            if(payload.table === 'spottings' && payload.eventType === 'INSERT') {
+                dispatch(addSpotting(payload.new))
+            }
         })
         .subscribe()
 
@@ -40,9 +49,16 @@ export default function PageTemplate(props: Props) {
             <link rel="icon" href="/favicon.ico" />
         </Head>
         <header className="relative text-center">
-            {session && <a onClick={signOut} className="link absolute right-0">
-                Logga ut {session?.user.email}
-            </a>}
+            <div className="absolute right-0 text-right">
+                {session && <a onClick={signOut} className="link">
+                    Logga ut {session?.user.email}
+
+                </a>}
+                <br/>
+                <Link href="/settings">
+                    <a className="link">Inställningar</a>
+                </Link>
+            </div>
             <h1 className="pt-10 text-2xl">
                 Platespotting Sverige
             </h1>

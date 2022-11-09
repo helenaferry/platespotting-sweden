@@ -6,11 +6,11 @@ import Plate from './../plate/Plate'
 import { LocationType } from './../../types/LocationType'
 // import LocationSelectorMap from './../location-selector-map/LocationSelectorMap.js'
 import { useAppSelector, useAppDispatch } from './../../hooks'
-import { selectNextPlate, addNewSpotting } from './../../store/spottingsSlice'
+import { selectNextPlate, addNewSpotting, selectAllTeamMembers } from './../../store/spottingsSlice'
 
 import dynamic from "next/dynamic"
 
-const LocationSelectorMap = dynamic(() => import("./../location-selector-map/LocationSelectorMap.js"), { ssr:false })
+const LocationSelectorMap = dynamic(() => import("./../location-selector-map/LocationSelectorMap.js"), { ssr: false })
 
 
 const AddForm: React.FunctionComponent = () => {
@@ -19,6 +19,7 @@ const AddForm: React.FunctionComponent = () => {
     const todayString = getTodayString()
     const [note, setNote] = useState("")
     const [date, setDate] = useState(todayString)
+    const [membersSeen, setMembersSeen] = useState([''])
     const [location_lat, setLat] = useState(0)
     const [location_lng, setLng] = useState(0)
     const dispatch = useAppDispatch()
@@ -26,6 +27,7 @@ const AddForm: React.FunctionComponent = () => {
     const status = useAppSelector(state => state.spottings.status)
     const supabase = useSupabaseClient()
     const [addSpottingStatus, setAddSpottingStatus] = useState('idle')
+    const teamMembers = useAppSelector(selectAllTeamMembers)
 
     const onChangeNote = (event: any) => {
         setNote(event.target.value)
@@ -33,6 +35,10 @@ const AddForm: React.FunctionComponent = () => {
 
     const onChangeDate = (event: any) => {
         setDate(event.target.value);
+    }
+
+    const onChangeMembersSeen = () => {
+        setMembersSeen(Array.from(document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value));
     }
 
     const onSubmit = (event: any) => {
@@ -57,7 +63,7 @@ const AddForm: React.FunctionComponent = () => {
             console.log('allowed to save and will try?')
             try {
                 setAddSpottingStatus('pending')
-                await dispatch(addNewSpotting({ plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email, location_lat: location_lat, location_lng: location_lng }))
+                await dispatch(addNewSpotting({ plateNumber: nextPlate, dateSpotted: date, note: note, profile: session?.user.id, location_lat: location_lat, location_lng: location_lng, spottingTeamMembers: null }))
             } catch (err) {
                 console.error('Failed to save the spotting: ', err)
             } finally {
@@ -71,16 +77,23 @@ const AddForm: React.FunctionComponent = () => {
     async function addSpotting() {
         if (canSave) {
             setAddSpottingStatus('pending')
-            const { data, error } = await supabase
+            const { data: spottingData, error: spottingError } = await supabase
                 .from('spottings')
                 .insert(
-                    { plateNumber: nextPlate, dateSpotted: date, note: note, email: session?.user.email, location_lat: location_lat, location_lng: location_lng }
+                    { plateNumber: nextPlate, dateSpotted: date, note: note, profile: session?.user.id, location_lat: location_lat, location_lng: location_lng }
                 )
-            if (!error) {
+                .select('*')
+            if (!spottingError) {
                 router.push('/list')
             } else {
-                console.log(error)
+                console.log(spottingError)
+                return;
             }
+            membersSeen.map(async member => {
+                const { data, error } = await supabase
+                    .from('spottingTeamMembers')
+                    .insert({ teamMember: member, spotting: spottingData[0].id, profile: session?.user.id })
+            })
             setAddSpottingStatus('idle')
         }
     }
@@ -88,6 +101,14 @@ const AddForm: React.FunctionComponent = () => {
     function updateLocationHandler(data: LocationType) {
         setLat(data.lat);
         setLng(data.lng);
+    }
+
+    const teamMembersSection = () => {
+        return <section><p>Vilka lagmedlemmar såg?</p>
+            {teamMembers.map(teamMember =>
+                <div key={teamMember.id}>
+                    <input name="membersSeen" type="checkbox" value={teamMember.id} id={teamMember.id} onChange={onChangeMembersSeen} />
+                    <label htmlFor={teamMember.id}>{teamMember.name}</label></div>)}</section>
     }
 
     return (status == 'succeeded' && addSpottingStatus == 'idle' ?
@@ -102,6 +123,7 @@ const AddForm: React.FunctionComponent = () => {
             <input name="lng" type="text" value={location_lng} readOnly className="border block mb-4"></input>
             <label htmlFor="note">Anteckning</label>
             <textarea name="note" onChange={onChangeNote} className="border block mb-4" />
+            {teamMembers.length > 0 && teamMembersSection()}
             <button type="submit" className="btn-primary" disabled={!canSave}>
                 Spara
             </button>

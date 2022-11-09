@@ -13,6 +13,7 @@ const SpottingTable = () => {
         <tr>
           <th>Nummerplåt</th>
           <th>Datum</th>
+          <th>Teammedlemmar</th>
           <th>Anteckning</th>
         </tr>
       </thead>
@@ -22,6 +23,7 @@ const SpottingTable = () => {
             return <tr key={index} >
               <td className=""><Plate plateNumber={spotting.plateNumber}></Plate></td>
               <td className="">{spotting.dateSpotted}</td>
+              <td className="">{spotting.spottingTeamMembers && spotting.spottingTeamMembers.map(tm => <span key={tm.teamMembers.name}>{tm.teamMembers.name} </span>)}</td>
               <td className="">{spotting.note}</td>
             </tr>
           })

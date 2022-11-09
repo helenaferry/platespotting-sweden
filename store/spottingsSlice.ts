@@ -1,26 +1,44 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from './store'
 import { SpottingType } from '../types/SpottingType'
+import { TeamMemberType } from '../types/TeamMemberType'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 
 interface SpottingsState {
-    status: 'idle' | 'loading' | 'succeeded' | 'failed' | 'refreshNeeded',
+    status: 'idle' | 'loading' | 'succeeded' | 'failed',
+    teamMemberStatus: 'idle' | 'loading' | 'succeeded' | 'failed',
     loading: boolean,
     spottings: SpottingType[],
+    teamMembers: TeamMemberType[],
     error: string | null,
 }
 
 const initialState: SpottingsState = {
     status: 'idle',
+    teamMemberStatus: 'idle',
     loading: false,
     spottings: [],
+    teamMembers: [],
     error: '',
 }
 
 export const fetchSpottings = createAsyncThunk('spottings/fetchSpottings', async () => {
     let { data: spottings, error } = await useSupabaseClient()
         .from('spottings')
-        .select('*')
+        .select(`
+        plateNumber,
+        location_lat,
+        location_lng,
+        dateSpotted,
+        note,
+        spottingTeamMembers!fk_spotting_teammember (
+          teamMember,
+            teamMembers!fk_spotting_teammember2(
+                name,
+                color
+            )
+        )
+      `)
         .order('plateNumber', { ascending: false })
     if (error) { console.log(error); }
     return spottings;
@@ -42,6 +60,14 @@ export const addNewSpotting = createAsyncThunk(
     }
 );
 
+export const fetchTeamMembers = createAsyncThunk('spottings/fetchTeamMembers', async () => {
+    let { data: teamMembers, error } = await useSupabaseClient()
+        .from('teamMembers')
+        .select('*')
+    if (error) { console.log(error); }
+    return teamMembers;
+})
+
 export const spottingsSlice = createSlice({
     name: 'spottings',
     initialState,
@@ -61,6 +87,17 @@ export const spottingsSlice = createSlice({
             })
             .addCase(fetchSpottings.rejected, (state, action) => {
                 state.status = 'failed'
+                state.error = action.error.message || ''
+            })
+            .addCase(fetchTeamMembers.pending, (state, action) => {
+                state.teamMemberStatus = 'loading'
+            })
+            .addCase(fetchTeamMembers.fulfilled, (state, action: PayloadAction<any>) => {
+                state.teamMemberStatus = 'succeeded'
+                state.teamMembers = state.teamMembers.concat(action.payload)
+            })
+            .addCase(fetchTeamMembers.rejected, (state, action) => {
+                state.teamMemberStatus = 'failed'
                 state.error = action.error.message || ''
             })
             .addCase(addNewSpotting.pending, (state, action) => {
@@ -89,5 +126,7 @@ export const selectNextPlate = (state: RootState) => {
 };
 
 export const selectAllSpottings = (state: RootState) => state.spottings.spottings
+
+export const selectAllTeamMembers = (state: RootState) => state.spottings.teamMembers
 
 export default spottingsSlice.reducer
