@@ -35,7 +35,8 @@ export const fetchSpottings = createAsyncThunk('spottings/fetchSpottings', async
           teamMember,
             teamMembers!fk_spotting_teammember2(
                 name,
-                color
+                color,
+                id
             )
         )
       `)

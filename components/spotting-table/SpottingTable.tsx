@@ -2,6 +2,7 @@
 import Plate from './../plate/Plate'
 import { useAppSelector } from './../../hooks'
 import { selectAllSpottings } from './../../store/spottingsSlice'
+import MemberBadge from './../member-badge/MemberBadge'
 
 const SpottingTable = () => {
   const spottings = useAppSelector(selectAllSpottings)
@@ -11,10 +12,10 @@ const SpottingTable = () => {
     <table className="w-full">
       <thead>
         <tr>
-          <th>Nummerplåt</th>
-          <th>Datum</th>
-          <th>Teammedlemmar</th>
-          <th>Anteckning</th>
+          <th className="text-left">Nummerplåt</th>
+          <th className="text-left">Datum</th>
+          <th className="text-left">Teammedlemmar</th>
+          <th className="text-left">Anteckning</th>
         </tr>
       </thead>
       <tbody>
@@ -23,7 +24,7 @@ const SpottingTable = () => {
             return <tr key={index} >
               <td className=""><Plate plateNumber={spotting.plateNumber}></Plate></td>
               <td className="">{spotting.dateSpotted}</td>
-              <td className="">{spotting.spottingTeamMembers && spotting.spottingTeamMembers.map(tm => <span key={tm.teamMembers.name}>{tm.teamMembers.name} </span>)}</td>
+              <td className="">{spotting.spottingTeamMembers && spotting.spottingTeamMembers.map(tm => <MemberBadge key={tm.teamMembers.id} id={tm.teamMembers.id} name={tm.teamMembers.name} color={tm.teamMembers.color} />)}</td>
               <td className="">{spotting.note}</td>
             </tr>
           })

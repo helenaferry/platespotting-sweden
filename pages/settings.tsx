@@ -47,7 +47,7 @@ const Settings: NextPage = () => {
 
     function teamMembersList() {
         return <ul>
-            {teamMembers.map(member => <li key={member.id}>{member.name}<MemberBadge id={member.id} name={member.name} color={member.color}/></li>)}
+            {teamMembers.map(member => <li key={member.id}><MemberBadge id={member.id} name={member.name} color={member.color}/>{member.name}</li>)}
         </ul>
     }
 
