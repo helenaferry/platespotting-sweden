@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import spottingsReducer from './spottingsSlice'
+import teamMembersReducer from './teamMemberSlice'
 
 const store = configureStore({
     reducer: {
-        spottings: spottingsReducer
+        spottings: spottingsReducer,
+        teamMembers: teamMembersReducer
     },
 })
 

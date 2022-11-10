@@ -2,7 +2,8 @@ import React, { ReactNode, useEffect } from 'react'
 import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useAppSelector, useAppDispatch } from './../../hooks'
-import { addSpotting, fetchSpottings, fetchTeamMembers, selectAllTeamMembers } from './../../store/spottingsSlice'
+import { addSpotting, fetchSpottings } from './../../store/spottingsSlice'
+import { fetchTeamMembers, selectAllTeamMembers } from './../../store/teamMemberSlice'
 import Head from 'next/head'
 import Link from 'next/link'
 
@@ -15,10 +16,9 @@ export default function PageTemplate(props: Props) {
     const supabase = useSupabaseClient()
     const error = useAppSelector(state => state.spottings.error)
     const status = useAppSelector(state => state.spottings.status)
-    const teamMemberStatus = useAppSelector(state => state.spottings.teamMemberStatus)
+    const teamMemberStatus = useAppSelector(state => state.teamMembers.status)
     const dispatch = useAppDispatch()
 
-    const teamMembers = useAppSelector(selectAllTeamMembers);
 
     if (status === 'idle') {
         dispatch(fetchSpottings())
@@ -31,6 +31,7 @@ export default function PageTemplate(props: Props) {
     supabase
         .channel('*')
         .on('postgres_changes', { event: '*', schema: '*' }, payload => {
+            console.log('postgrs_changes ' + payload.eventType + ' ' + payload.table, payload.new);
             if(payload.table === 'spottings' && payload.eventType === 'INSERT') {
                 dispatch(addSpotting(payload.new))
             }

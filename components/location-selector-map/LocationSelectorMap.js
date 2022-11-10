@@ -79,7 +79,7 @@ export default function LocationSelectorMap(props) {
       map.on('geosearch/showlocation', searchHandler)
 
       return () => map.removeControl(searchControl);
-    }, []);
+    }, [map]);
 
     return null;
   }
