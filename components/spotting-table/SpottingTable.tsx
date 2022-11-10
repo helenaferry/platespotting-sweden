@@ -7,6 +7,7 @@ import MemberBadge from './../member-badge/MemberBadge'
 const SpottingTable = () => {
   const spottings = useAppSelector(selectAllSpottings)
   const status = useAppSelector(state => state.spottings.status)
+  const hasTeamMembers = useAppSelector(state => state.teamMembers.hasTeamMembers)
 
   return (
     <table className="w-full">
@@ -14,7 +15,7 @@ const SpottingTable = () => {
         <tr>
           <th className="text-left">Nummerplåt</th>
           <th className="text-left">Datum</th>
-          <th className="text-left">Teammedlemmar</th>
+          {hasTeamMembers && <th className="text-left">Teammedlemmar</th>}
           <th className="text-left">Anteckning</th>
         </tr>
       </thead>
@@ -24,7 +25,7 @@ const SpottingTable = () => {
             return <tr key={index} >
               <td className=""><Plate plateNumber={spotting.plateNumber}></Plate></td>
               <td className="">{spotting.dateSpotted}</td>
-              <td className="">{spotting.spottingTeamMembers && spotting.spottingTeamMembers.map(tm => <MemberBadge key={tm.teamMembers.id} id={tm.teamMembers.id} name={tm.teamMembers.name} color={tm.teamMembers.color} />)}</td>
+              {hasTeamMembers && <td className="">{spotting.spottingTeamMembers && spotting.spottingTeamMembers.map(tm => <MemberBadge key={tm.teamMembers.id} id={tm.teamMembers.id} name={tm.teamMembers.name} color={tm.teamMembers.color} />)}</td>}
               <td className="">{spotting.note}</td>
             </tr>
           })

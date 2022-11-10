@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router'
 import Plate from './../plate/Plate'
 import { LocationType } from './../../types/LocationType'
-// import LocationSelectorMap from './../location-selector-map/LocationSelectorMap.js'
 import { useAppSelector, useAppDispatch } from './../../hooks'
-import { selectNextPlate, addNewSpotting, selectAllTeamMembers } from './../../store/spottingsSlice'
+import { selectNextPlate, addNewSpotting } from './../../store/spottingsSlice'
+import { selectAllTeamMembers } from './../../store/teamMemberSlice'
 
 import dynamic from "next/dynamic"
 

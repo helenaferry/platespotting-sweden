@@ -3,7 +3,7 @@ import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useAppSelector, useAppDispatch } from './../../hooks'
 import { addSpotting, fetchSpottings } from './../../store/spottingsSlice'
-import { fetchTeamMembers, selectAllTeamMembers } from './../../store/teamMemberSlice'
+import { fetchTeamMembers, fetchSettings, selectAllTeamMembers } from './../../store/teamMemberSlice'
 import Head from 'next/head'
 import Link from 'next/link'
 
@@ -17,6 +17,7 @@ export default function PageTemplate(props: Props) {
     const error = useAppSelector(state => state.spottings.error)
     const status = useAppSelector(state => state.spottings.status)
     const teamMemberStatus = useAppSelector(state => state.teamMembers.status)
+    const name = useAppSelector(state => state.teamMembers.name)
     const dispatch = useAppDispatch()
 
 
@@ -28,11 +29,15 @@ export default function PageTemplate(props: Props) {
         dispatch(fetchTeamMembers())
     }
 
+    useEffect(() => {
+        dispatch(fetchSettings({ id: session?.user.id, supabase: supabase }))
+    }, [session])
+
     supabase
         .channel('*')
         .on('postgres_changes', { event: '*', schema: '*' }, payload => {
             console.log('postgrs_changes ' + payload.eventType + ' ' + payload.table, payload.new);
-            if(payload.table === 'spottings' && payload.eventType === 'INSERT') {
+            if (payload.table === 'spottings' && payload.eventType === 'INSERT') {
                 dispatch(addSpotting(payload.new))
             }
         })
@@ -51,14 +56,16 @@ export default function PageTemplate(props: Props) {
         </Head>
         <header className="relative text-center">
             <div className="absolute right-0 text-right">
-                {session && <a onClick={signOut} className="link">
-                    Logga ut {session?.user.email}
+                {session && <section><a onClick={signOut} className="link">
+                    Logga ut {name ? name : session?.user.email}
 
-                </a>}
-                <br/>
-                <Link href="/settings">
-                    <a className="link">Inställningar</a>
-                </Link>
+                </a>
+                    <br />
+                    <Link href="/settings">
+                        <a className="link">Inställningar</a>
+                    </Link></section>
+                }
+
             </div>
             <h1 className="pt-10 text-2xl">
                 Platespotting Sverige
