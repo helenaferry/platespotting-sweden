@@ -16,15 +16,15 @@ const Settings: NextPage = () => {
 
     const [hasTeam, setHasTeam] = useState(hasTeamMembers);
 
-    const [formName, setFormName] = useState(name)
-    const [color, setColor] = useState("#000000")
+    const [newTeamMemberName, setNewTeamMemberName] = useState('')
+    const [newTeamMemberColor, setNewTeamMemberColor] = useState("#000000")
 
-    const onChangeName = (event: any) => {
-        setFormName(event.target.value)
+    const onChangeNewTeamMemberName = (event: any) => {
+        setNewTeamMemberName(event.target.value)
     }
 
-    const onChangeColor = (event: any) => {
-        setColor(event.target.value)
+    const onChangeNewTeamMemberColor = (event: any) => {
+        setNewTeamMemberColor(event.target.value)
     }
 
     const onSubmit = (event: any) => {
@@ -36,7 +36,7 @@ const Settings: NextPage = () => {
         const { data, error } = await supabase
             .from('teamMembers')
             .insert(
-                { name: name, color: color, profile: session?.user.id }
+                { name: newTeamMemberName, color: newTeamMemberColor, profile: session?.user.id }
             )
         if (error) {
             console.log(error)
@@ -57,20 +57,20 @@ const Settings: NextPage = () => {
     return (
         <div>
             <PageTemplate>{hasTeamMembers}
-                <label htmlFor="name">Namn</label>
-                <input id="name" type="name" value={name}></input>
+                <label htmlFor="name">{hasTeam ? 'Teamets namn' : 'Mitt namn'}</label>
+                <input id="name" type="name" value={name} className="border block mb-4"></input>
                 <br/>
                 <input type="checkbox" onClick={toggleHasTeam} defaultChecked={hasTeamMembers} />Vi är ett team som letar tillsammans
                 {hasTeam && <section>
                     <h2>Teammedlemmar</h2>
                     {teamMembersList()}
-                    <h2>Lägg till teammedlem</h2>
+                    <h2>Ny teammedlem</h2>
                     <form onSubmit={onSubmit} className="flex flex-col">
-                        <label htmlFor="note">Namn</label>
-                        <input name="name" onChange={onChangeName} className="border block mb-4" />
-                        <label htmlFor="color">Färg</label>
-                        <input type="color" name="color" onChange={onChangeColor} />
-                        <button type="submit" className="btn-primary">Lägg till</button>
+                        <label htmlFor="newTeamMemberName">Teammedlemmens namn</label>
+                        <input name="newTeamMemberName" onChange={onChangeNewTeamMemberName} className="border block mb-4" />
+                        <label htmlFor="newTeamMemberColor">Teammedlemmens favoritfärg</label>
+                        <input type="color" name="newTeamMemberColor" onChange={onChangeNewTeamMemberColor} />
+                        <button type="submit" className="btn-primary">Lägg till teammedlem</button>
                     </form>
                 </section>}
             </PageTemplate>
