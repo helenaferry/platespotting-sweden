@@ -3,7 +3,8 @@ import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useAppSelector, useAppDispatch } from './../../hooks'
 import { addSpotting, fetchSpottings } from './../../store/spottingsSlice'
-import { fetchTeamMembers, fetchSettings, selectAllTeamMembers } from './../../store/teamMemberSlice'
+import { fetchTeamMembers, selectAllTeamMembers } from './../../store/teamMemberSlice'
+import { fetchSettings} from './../../store/settingsSlice';
 import Head from 'next/head'
 import Link from 'next/link'
 
@@ -17,7 +18,7 @@ export default function PageTemplate(props: Props) {
     const error = useAppSelector(state => state.spottings.error)
     const status = useAppSelector(state => state.spottings.status)
     const teamMemberStatus = useAppSelector(state => state.teamMembers.status)
-    const name = useAppSelector(state => state.teamMembers.name)
+    const name = useAppSelector(state => state.settings.name)
     const dispatch = useAppDispatch()
 
 
@@ -33,7 +34,7 @@ export default function PageTemplate(props: Props) {
         dispatch(fetchSettings({ id: session?.user.id, supabase: supabase }))
     }, [session])
 
-    supabase
+   /* supabase
         .channel('*')
         .on('postgres_changes', { event: '*', schema: '*' }, payload => {
             console.log('postgrs_changes ' + payload.eventType + ' ' + payload.table, payload.new);
@@ -41,7 +42,7 @@ export default function PageTemplate(props: Props) {
                 dispatch(addSpotting(payload.new))
             }
         })
-        .subscribe()
+        .subscribe()*/
 
     async function signOut() {
         const { error } = await supabase.auth.signOut()

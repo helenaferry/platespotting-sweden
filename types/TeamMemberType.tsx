@@ -1,5 +1,6 @@
 export type TeamMemberType = {
-    id: string;
+    // id: string;
     name: string;
     color: string;
+    profile: string | undefined;
   }

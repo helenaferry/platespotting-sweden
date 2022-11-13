@@ -4,20 +4,27 @@ import PageTemplate from "./../components/page-template/PageTemplate"
 import MemberBadge from './../components/member-badge/MemberBadge'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useAppSelector, useAppDispatch } from './../hooks'
-import { selectAllTeamMembers, setHasTeamMembers } from './../store/teamMemberSlice'
+import { selectAllTeamMembers, addNewTeamMember } from './../store/teamMemberSlice'
+import { setHasTeamMembers } from '../store/settingsSlice';
 
 const Settings: NextPage = () => {
     const supabase = useSupabaseClient()
     const session = useSession()
     const dispatch = useAppDispatch()
-    const hasTeamMembers = useAppSelector(state => state.teamMembers.hasTeamMembers)
-    const name = useAppSelector(state => state.teamMembers.name)
+    const hasTeamMembers = useAppSelector(state => state.settings.hasTeamMembers)
+    const name = useAppSelector(state => state.settings.name)
     const teamMembers = useAppSelector(selectAllTeamMembers)
+    const status = useAppSelector(state => state.settings.status)
+    const error = useAppSelector(state => state.spottings.error)
 
     const [hasTeam, setHasTeam] = useState(hasTeamMembers);
 
     const [newTeamMemberName, setNewTeamMemberName] = useState('')
     const [newTeamMemberColor, setNewTeamMemberColor] = useState("#000000")
+
+    const onChangeName = (event: any) => {
+        console.log('name to be ' + event.target.value);
+    }
 
     const onChangeNewTeamMemberName = (event: any) => {
         setNewTeamMemberName(event.target.value)
@@ -33,14 +40,15 @@ const Settings: NextPage = () => {
     }
 
     async function addTeamMember() {
-        const { data, error } = await supabase
-            .from('teamMembers')
-            .insert(
-                { name: newTeamMemberName, color: newTeamMemberColor, profile: session?.user.id }
-            )
-        if (error) {
-            console.log(error)
-        }
+        dispatch(addNewTeamMember(
+            {
+                teamMember:
+                {
+                    name: newTeamMemberName, color: newTeamMemberColor, profile: session?.user.id
+                },
+                supabase: supabase
+            }
+        ));
     }
 
     function toggleHasTeam(e: any) {
@@ -50,7 +58,7 @@ const Settings: NextPage = () => {
 
     function teamMembersList() {
         return <ul>
-            {teamMembers.map(member => <li key={member.id}><MemberBadge id={member.id} name={member.name} color={member.color} />{member.name}</li>)}
+            {teamMembers && teamMembers.map(member => { return <li key={member.name}><MemberBadge name={member.name} color={member.color} profile={member.profile} />{member.name}</li> })}
         </ul>
     }
 
@@ -58,11 +66,13 @@ const Settings: NextPage = () => {
         <div>
             <PageTemplate>{hasTeamMembers}
                 <label htmlFor="name">{hasTeam ? 'Teamets namn' : 'Mitt namn'}</label>
-                <input id="name" type="name" value={name} className="border block mb-4"></input>
-                <br/>
+                <input id="name" type="name" value={name || ''} onChange={onChangeName} className="border block mb-4"></input>
+                <br />
                 <input type="checkbox" onClick={toggleHasTeam} defaultChecked={hasTeamMembers} />Vi är ett team som letar tillsammans
                 {hasTeam && <section>
                     <h2>Teammedlemmar</h2>
+                    <p>{status}</p>
+                    <p>{error}</p>
                     {teamMembersList()}
                     <h2>Ny teammedlem</h2>
                     <form onSubmit={onSubmit} className="flex flex-col">
