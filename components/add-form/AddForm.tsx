@@ -115,7 +115,7 @@ const AddForm: React.FunctionComponent = () => {
             {teamMembers.map(teamMember =>
                 <div key={teamMember.id}>
                     <input name="membersSeen" type="checkbox" value={teamMember.id} id={teamMember.id} onChange={onChangeMembersSeen} />
-                    <label htmlFor={teamMember.id}>{teamMember.name}</label></div>)}</section>
+                    <label htmlFor={teamMember.name}>{teamMember.name}</label></div>)}</section>
     }
 
     return (status == 'succeeded' && addSpottingStatus == 'idle' ?

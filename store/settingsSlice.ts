@@ -5,7 +5,7 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react'
 
 interface SettingsState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed',
-    error: string | null,
+    error: string | undefined,
     hasTeamMembers: boolean,
     name: string,
     email: string
@@ -25,6 +25,9 @@ type FetchSettingsType = {
 }
 
 export const fetchSettings = createAsyncThunk('settings/fetchSettings', async (prop: FetchSettingsType) => {
+    console.log(
+        'fetchSettings', prop.id
+    )
     if (!prop.id) return
     let { data: settings, error } = await prop.supabase
         .from('profiles')
@@ -59,16 +62,18 @@ export const settingsSlice = createSlice({
         builder
             // Fetch user settings
             .addCase(fetchSettings.pending, (state, action) => {
-                console.log('pending')
+                console.log('fetchSettings pending')
             })
             .addCase(fetchSettings.fulfilled, (state, action: PayloadAction<any>) => {
+                console.log('fetchSettings fulfilled', action.payload);
                 if (!action || !action.payload || !action.payload[0]) return;
                 state.hasTeamMembers = action.payload[0].hasTeamMembers;
                 state.name = action.payload[0].name;
                 state.email = action.payload[0].email;
             })
             .addCase(fetchSettings.rejected, (state, action) => {
-                console.log(action.error.message || '')
+                console.log('fetchSettings error', action.error.message);
+                state.error = action.error.message;
             }) 
             // Set has team members
             .addCase(setHasTeamMembers.pending, (state, action) => {

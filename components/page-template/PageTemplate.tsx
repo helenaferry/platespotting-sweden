@@ -18,6 +18,7 @@ export default function PageTemplate(props: Props) {
     const error = useAppSelector(state => state.spottings.error)
     const status = useAppSelector(state => state.spottings.status)
     const teamMemberStatus = useAppSelector(state => state.teamMembers.status)
+   //  const settingsStatus = useAppSelector(state => state.settings.status)
     const name = useAppSelector(state => state.settings.name)
     const dispatch = useAppDispatch()
 
