@@ -46,6 +46,9 @@ export const teamMembersSlice = createSlice({
     name: 'teamMembers',
     initialState,
     reducers: {
+      /*  findTeamMember: (state, action) => {
+            return state.teamMembers.find(teamMember => teamMember.id == action.payload.id);
+        }*/
     },
     extraReducers(builder) {
         builder
@@ -69,6 +72,7 @@ export const teamMembersSlice = createSlice({
             .addCase(addNewTeamMember.fulfilled, (state, action: PayloadAction<any>) => {
                 state.status = 'succeeded'
                 console.log('succeeded', action.payload);
+                if (!action.payload) return;
                 state.teamMembers.unshift(action.payload[0])
                 console.log('teamMembers now', state.teamMembers)
             })
@@ -80,7 +84,7 @@ export const teamMembersSlice = createSlice({
     }
 })
 
-// export const { } = teamMembersSlice.actions
+// export const { findTeamMember } = teamMembersSlice.actions
 
 export const selectAllTeamMembers = (state: RootState) => state.teamMembers.teamMembers
 

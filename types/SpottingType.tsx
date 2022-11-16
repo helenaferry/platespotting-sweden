@@ -7,7 +7,7 @@ export type SpottingType = {
     dateSpotted: string,
     note: string,
     profile: string | undefined,
-    spottingTeamMembers: SpottingTeamMembersType[] | null
+    spottingTeamMembers: SpottingTeamMembersType[] | undefined
 }
 
 type SpottingTeamMembersType = {

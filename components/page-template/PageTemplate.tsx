@@ -2,8 +2,8 @@ import React, { ReactNode, useEffect } from 'react'
 import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useAppSelector, useAppDispatch } from './../../hooks'
-import { addSpotting, fetchSpottings } from './../../store/spottingsSlice'
-import { fetchTeamMembers, selectAllTeamMembers } from './../../store/teamMemberSlice'
+import { fetchSpottings } from './../../store/spottingsSlice'
+import { fetchTeamMembers } from './../../store/teamMemberSlice'
 import { fetchSettings} from './../../store/settingsSlice';
 import Head from 'next/head'
 import Link from 'next/link'
@@ -22,7 +22,6 @@ export default function PageTemplate(props: Props) {
     const name = useAppSelector(state => state.settings.name)
     const dispatch = useAppDispatch()
 
-
     if (status === 'idle') {
         dispatch(fetchSpottings())
     }
@@ -32,7 +31,7 @@ export default function PageTemplate(props: Props) {
     }
 
     useEffect(() => {
-        dispatch(fetchSettings({ id: session?.user.id, supabase: supabase }))
+        dispatch(fetchSettings({ id: session?.user.id, database: supabase }))
     }, [session])
 
    /* supabase
@@ -41,6 +40,17 @@ export default function PageTemplate(props: Props) {
             console.log('postgrs_changes ' + payload.eventType + ' ' + payload.table, payload.new);
             if (payload.table === 'spottings' && payload.eventType === 'INSERT') {
                 dispatch(addSpotting(payload.new))
+            }
+        })
+        .subscribe()*/
+
+       /* supabase
+        .channel('*')
+        .on('postgres_changes', { event: '*', schema: '*' }, payload => {
+            console.log('postgrs_changes ' + payload.eventType + ' ' + payload.table, payload.new);
+            if (payload.table === 'spottingTeamMembers' && payload.eventType === 'INSERT') {
+                console.log('team member added', payload.new);
+                console.log(dispatch(findTeamMember(payload.new.id)))
             }
         })
         .subscribe()*/

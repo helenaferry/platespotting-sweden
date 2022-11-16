@@ -1,7 +1,4 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-import type { RootState } from './store'
-import { TeamMemberType } from '../types/TeamMemberType'
-import { useSupabaseClient } from '@supabase/auth-helpers-react'
 
 interface SettingsState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed',
@@ -21,7 +18,7 @@ const initialState: SettingsState = {
 
 type FetchSettingsType = {
     id: string | undefined,
-    supabase: any
+    database: any
 }
 
 export const fetchSettings = createAsyncThunk('settings/fetchSettings', async (prop: FetchSettingsType) => {
@@ -29,7 +26,7 @@ export const fetchSettings = createAsyncThunk('settings/fetchSettings', async (p
         'fetchSettings', prop.id
     )
     if (!prop.id) return
-    let { data: settings, error } = await prop.supabase
+    let { data: settings, error } = await prop.database
         .from('profiles')
         .select('name, email, hasTeamMembers')
         .eq('id', prop.id)
@@ -40,11 +37,11 @@ export const fetchSettings = createAsyncThunk('settings/fetchSettings', async (p
 type HasTeamMembersType = {
     hasTeamMembers: boolean,
     id: string,
-    supabase: any
+    database: any
 }
 
 export const setHasTeamMembers = createAsyncThunk('teamMembers/setHasTeamMembers', async (prop: HasTeamMembersType) => {
-    const { data, error } = await prop.supabase
+    const { data, error } = await prop.database
         .from('profiles')
         .update({ hasTeamMembers: prop.hasTeamMembers })
         .eq('id', prop.id)
@@ -62,7 +59,7 @@ export const settingsSlice = createSlice({
         builder
             // Fetch user settings
             .addCase(fetchSettings.pending, (state, action) => {
-                console.log('fetchSettings pending')
+                state.status = 'loading';
             })
             .addCase(fetchSettings.fulfilled, (state, action: PayloadAction<any>) => {
                 console.log('fetchSettings fulfilled', action.payload);
@@ -70,24 +67,25 @@ export const settingsSlice = createSlice({
                 state.hasTeamMembers = action.payload[0].hasTeamMembers;
                 state.name = action.payload[0].name;
                 state.email = action.payload[0].email;
+                state.status = 'succeeded';
             })
             .addCase(fetchSettings.rejected, (state, action) => {
                 console.log('fetchSettings error', action.error.message);
+                state.status = 'failed';
                 state.error = action.error.message;
             }) 
             // Set has team members
             .addCase(setHasTeamMembers.pending, (state, action) => {
-                //state.status = 'loading'
-                console.log('loading');
+                state.status = 'loading'
             })
             .addCase(setHasTeamMembers.fulfilled, (state, action: PayloadAction<any>) => {
-                //state.status = 'succeeded'
+                state.status = 'succeeded'
                 state.hasTeamMembers = action.payload.hasTeamMembers;
                 console.log('setHasTeamMEmbers got', action.payload)
             })
             .addCase(setHasTeamMembers.rejected, (state, action) => {
-                //state.status = 'failed'
-                //state.error = action.error.message || '';
+                state.status = 'failed'
+                state.error = action.error.message || '';
                 console.log(action.error.message);
             })
     }

@@ -10,7 +10,7 @@ interface SpottingsState {
     loading: boolean,
     spottings: SpottingType[],
     teamMembers: TeamMemberType[],
-    error: string | null,
+    error: string | null
 }
 
 const initialState: SpottingsState = {
@@ -19,7 +19,7 @@ const initialState: SpottingsState = {
     loading: false,
     spottings: [],
     teamMembers: [],
-    error: '',
+    error: ''
 }
 
 export const fetchSpottings = createAsyncThunk('spottings/fetchSpottings', async () => {
@@ -45,78 +45,84 @@ export const fetchSpottings = createAsyncThunk('spottings/fetchSpottings', async
     return spottings;
 })
 
-export const addNewSpotting = createAsyncThunk(
-    "spottings/addNewSpotting",
-    async (spotting: SpottingType) => {
-        console.log('add', spotting);
-        try {
-            const response = await useSupabaseClient()
-                .from('spottings')
-                .insert(spotting)
-            // return response.data;
-            return spotting;
-        } catch (err) {
-            console.log(err);
-        }
-    }
-);
+type AddNewSpottingType = {
+    spotting: SpottingType,
+    membersSeen: (TeamMemberType | undefined)[],
+    database: any
+}
 
-export const fetchTeamMembers = createAsyncThunk('spottings/fetchTeamMembers', async () => {
-    let { data: teamMembers, error } = await useSupabaseClient()
-        .from('teamMembers')
-        .select('*')
-    if (error) { console.log(error); }
-    return teamMembers;
-})
+export const addNewSpotting = createAsyncThunk("spottings/addNewSpotting",
+    async (prop: AddNewSpottingType, { getState }) => {
+        const state = getState();
+        const { data: spottingData, error: spottingError } = await prop.database
+            .from('spottings')
+            .insert(
+                prop.spotting
+            )
+            .select('*')
+        if (spottingError) {
+            console.log(spottingError)
+        }
+        if (!prop.membersSeen || prop.membersSeen.length < 1) {
+            return spottingData;
+        }
+        prop.membersSeen.map(async member => {
+            if (!member) return;
+            const { data, error: tmError } = await prop.database
+                .from('spottingTeamMembers')
+                .insert({ teamMember: member.id, spotting: spottingData[0].id, profile: prop.spotting.profile })
+                .select()
+            if (tmError) {
+                console.log(tmError);
+                return;
+            }
+        })
+        
+        return spottingData;
+    })
 
 export const spottingsSlice = createSlice({
     name: 'spottings',
     initialState,
     reducers: {
-        addSpotting(state, action) {
-            console.log('add spotting', action.payload);
-            state.spottings.unshift(action.payload)
-        }
     },
     extraReducers(builder) {
         builder
+            // Fetch spottings
             .addCase(fetchSpottings.pending, (state, action) => {
                 state.status = 'loading'
             })
             .addCase(fetchSpottings.fulfilled, (state, action: PayloadAction<any>) => {
                 state.status = 'succeeded'
                 state.spottings = state.spottings.concat(action.payload)
+                console.log('fetchSpottings succeeded', action.payload);
             })
             .addCase(fetchSpottings.rejected, (state, action) => {
                 state.status = 'failed'
                 state.error = action.error.message || ''
             })
-            .addCase(fetchTeamMembers.pending, (state, action) => {
-                state.teamMemberStatus = 'loading'
-            })
-            .addCase(fetchTeamMembers.fulfilled, (state, action: PayloadAction<any>) => {
-                state.teamMemberStatus = 'succeeded'
-                state.teamMembers = state.teamMembers.concat(action.payload)
-            })
-            .addCase(fetchTeamMembers.rejected, (state, action) => {
-                state.teamMemberStatus = 'failed'
-                state.error = action.error.message || ''
-            })
+            // Add new spotting
             .addCase(addNewSpotting.pending, (state, action) => {
+                console.log('addNewSpotting loading');
                 state.status = 'loading'
             })
             .addCase(addNewSpotting.fulfilled, (state, action: PayloadAction<any>) => {
+                console.log('addNewSpotting succeeded', action.payload[0]);
                 state.status = 'succeeded'
-                state.spottings.unshift(action.payload)
+                if (!action.payload) return
+                const newSpotting = action.payload[0];
+                state.spottings.unshift(newSpotting)
+                
             })
             .addCase(addNewSpotting.rejected, (state, action) => {
+                console.log('addNewSpotting failed', action.error.message);
                 state.status = 'failed'
                 state.error = action.error.message || '';
             })
     }
 })
 
-export const { addSpotting } = spottingsSlice.actions
+// export const {  } = spottingsSlice.actions
 
 export const selectNextPlate = (state: RootState) => {
     let latest = state.spottings.spottings[0] // state.spottings.spottings && state.spottings.spottings.reduce((x, y) => x.plateNumber > y.plateNumber ? x : y, { plateNumber: 0 })
@@ -128,7 +134,5 @@ export const selectNextPlate = (state: RootState) => {
 };
 
 export const selectAllSpottings = (state: RootState) => state.spottings.spottings
-
-export const selectAllTeamMembers = (state: RootState) => state.spottings.teamMembers
 
 export default spottingsSlice.reducer

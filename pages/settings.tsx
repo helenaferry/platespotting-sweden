@@ -44,7 +44,7 @@ const Settings: NextPage = () => {
             {
                 teamMember:
                 {
-                    name: newTeamMemberName, color: newTeamMemberColor, profile: session?.user.id
+                    name: newTeamMemberName, color: newTeamMemberColor, profile: session?.user.id, id: undefined
                 },
                 supabase: supabase
             }
@@ -53,12 +53,12 @@ const Settings: NextPage = () => {
 
     function toggleHasTeam(e: any) {
         setHasTeam(e.target.checked);
-        dispatch(setHasTeamMembers({ hasTeamMembers: e.target.checked, id: session?.user.id + '', supabase: supabase }))
+        dispatch(setHasTeamMembers({ hasTeamMembers: e.target.checked, id: session?.user.id + '', database: supabase }))
     }
 
     function teamMembersList() {
         return <ul>
-            {teamMembers && teamMembers.map(member => { return <li key={member.name}><MemberBadge name={member.name} color={member.color} profile={member.profile} />{member.name}</li> })}
+            {teamMembers && teamMembers.map(member => { return <li key={member.name}><MemberBadge name={member.name} color={member.color} profile={member.profile} id={undefined} />{member.name}</li> })}
         </ul>
     }
 
