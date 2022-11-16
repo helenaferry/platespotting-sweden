@@ -1,11 +1,11 @@
 import type { NextPage } from 'next'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTemplate from "./../components/page-template/PageTemplate"
 import MemberBadge from './../components/member-badge/MemberBadge'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useAppSelector, useAppDispatch } from './../hooks'
 import { selectAllTeamMembers, addNewTeamMember } from './../store/teamMemberSlice'
-import { setHasTeamMembers } from '../store/settingsSlice';
+import { setHasTeamMembers, setName } from '../store/settingsSlice';
 
 const Settings: NextPage = () => {
     const supabase = useSupabaseClient()
@@ -18,12 +18,17 @@ const Settings: NextPage = () => {
     const error = useAppSelector(state => state.spottings.error)
 
     const [hasTeam, setHasTeam] = useState(hasTeamMembers);
+    const [newName, setNewName] = useState(name);
 
     const [newTeamMemberName, setNewTeamMemberName] = useState('')
     const [newTeamMemberColor, setNewTeamMemberColor] = useState("#000000")
 
-    const onChangeName = (event: any) => {
-        console.log('name to be ' + event.target.value);
+    useEffect(() => {
+        setNewName(name)
+    }, [name])
+
+    const onChangeNewName = (event: any) => {
+        setNewName(event.target.value)
     }
 
     const onChangeNewTeamMemberName = (event: any) => {
@@ -34,9 +39,16 @@ const Settings: NextPage = () => {
         setNewTeamMemberColor(event.target.value)
     }
 
-    const onSubmit = (event: any) => {
+    const onSubmitTeamMember = (event: any) => {
         event.preventDefault()
         addTeamMember()
+        setNewTeamMemberName('')
+        setNewTeamMemberColor('#000000')
+    }
+
+    const onSubmitName = (event: any) => {
+        event.preventDefault()
+        dispatch(setName({ name: newName, id: session?.user.id + '', database: supabase }))
     }
 
     async function addTeamMember() {
@@ -64,18 +76,21 @@ const Settings: NextPage = () => {
 
     return (
         <div>
-            <PageTemplate>{hasTeamMembers}
+            <PageTemplate>
+                <h2>Inställningar</h2>
+                <p>
+                    <input type="checkbox" onClick={toggleHasTeam} defaultChecked={hasTeamMembers} />Vi är ett team som letar tillsammans
+                </p>
                 <label htmlFor="name">{hasTeam ? 'Teamets namn' : 'Mitt namn'}</label>
-                <input id="name" type="name" value={name || ''} onChange={onChangeName} className="border block mb-4"></input>
-                <br />
-                <input type="checkbox" onClick={toggleHasTeam} defaultChecked={hasTeamMembers} />Vi är ett team som letar tillsammans
+                <form onSubmit={onSubmitName}>
+                    <input id="name" type="text" defaultValue={name} onChange={onChangeNewName} className="border block mb-4"></input>
+                    <button type="submit" className="btn-primary">Spara namn</button>
+                </form>
                 {hasTeam && <section>
                     <h2>Teammedlemmar</h2>
-                    <p>{status}</p>
-                    <p>{error}</p>
                     {teamMembersList()}
                     <h2>Ny teammedlem</h2>
-                    <form onSubmit={onSubmit} className="flex flex-col">
+                    <form onSubmit={onSubmitTeamMember} className="flex flex-col">
                         <label htmlFor="newTeamMemberName">Teammedlemmens namn</label>
                         <input name="newTeamMemberName" onChange={onChangeNewTeamMemberName} className="border block mb-4" />
                         <label htmlFor="newTeamMemberColor">Teammedlemmens favoritfärg</label>

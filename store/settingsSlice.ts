@@ -50,6 +50,22 @@ export const setHasTeamMembers = createAsyncThunk('teamMembers/setHasTeamMembers
     return data
 })
 
+type NameType = {
+    name: string,
+    id: string;
+    database: any
+}
+
+export const setName = createAsyncThunk('teamMembers/setName', async (prop: NameType) => {
+    const { data, error } = await prop.database
+        .from('profiles')
+        .update({ name: prop.name })
+        .eq('id', prop.id)
+        .select()
+    if (error) { console.log(error); }
+    return data
+})
+
 export const settingsSlice = createSlice({
     name: 'settings',
     initialState,
@@ -73,7 +89,7 @@ export const settingsSlice = createSlice({
                 console.log('fetchSettings error', action.error.message);
                 state.status = 'failed';
                 state.error = action.error.message;
-            }) 
+            })
             // Set has team members
             .addCase(setHasTeamMembers.pending, (state, action) => {
                 state.status = 'loading'
@@ -84,6 +100,20 @@ export const settingsSlice = createSlice({
                 console.log('setHasTeamMEmbers got', action.payload)
             })
             .addCase(setHasTeamMembers.rejected, (state, action) => {
+                state.status = 'failed'
+                state.error = action.error.message || '';
+                console.log(action.error.message);
+            })
+            // Set name
+            .addCase(setName.pending, (state, action) => {
+                state.status = 'loading'
+            })
+            .addCase(setName.fulfilled, (state, action: PayloadAction<any>) => {
+                state.status = 'succeeded'
+                state.name = action.payload[0].name;
+                console.log('setName got', action.payload)
+            })
+            .addCase(setName.rejected, (state, action) => {
                 state.status = 'failed'
                 state.error = action.error.message || '';
                 console.log(action.error.message);
