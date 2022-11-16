@@ -1,5 +1,5 @@
 import type { NextPage } from 'next'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PageTemplate from "./../components/page-template/PageTemplate"
 import MemberBadge from './../components/member-badge/MemberBadge'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
@@ -16,6 +16,7 @@ const Settings: NextPage = () => {
     const teamMembers = useAppSelector(selectAllTeamMembers)
     const status = useAppSelector(state => state.settings.status)
     const error = useAppSelector(state => state.spottings.error)
+    const teamMemberForm = useRef<HTMLFormElement>(null);
 
     const [hasTeam, setHasTeam] = useState(hasTeamMembers);
     const [newName, setNewName] = useState(name);
@@ -41,7 +42,10 @@ const Settings: NextPage = () => {
 
     const onSubmitTeamMember = (event: any) => {
         event.preventDefault()
+        if (!newTeamMemberName) return;
         addTeamMember()
+        if (teamMemberForm && teamMemberForm.current)
+        teamMemberForm.current.reset()
     }
 
     const onSubmitName = (event: any) => {
@@ -88,7 +92,7 @@ const Settings: NextPage = () => {
                     <h2>Teammedlemmar</h2>
                     {teamMembersList()}
                     <h2>Ny teammedlem</h2>
-                    <form onSubmit={onSubmitTeamMember} className="flex flex-col">
+                    <form onSubmit={onSubmitTeamMember}  ref={teamMemberForm} className="flex flex-col">
                         <label htmlFor="newTeamMemberName">Teammedlemmens namn</label>
                         <input name="newTeamMemberName" onChange={onChangeNewTeamMemberName} className="border block mb-4" />
                         <label htmlFor="newTeamMemberColor">Teammedlemmens favoritfärg</label>
