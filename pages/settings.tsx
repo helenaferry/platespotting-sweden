@@ -42,8 +42,6 @@ const Settings: NextPage = () => {
     const onSubmitTeamMember = (event: any) => {
         event.preventDefault()
         addTeamMember()
-        setNewTeamMemberName('')
-        setNewTeamMemberColor('#000000')
     }
 
     const onSubmitName = (event: any) => {
