@@ -60,7 +60,7 @@ export default function PageTemplate(props: Props) {
         location.reload()
     }
 
-    return <div className="w-screen min-h-full bg-slate-100"><div className="mx-auto min-h-screen bg-white p-5" style={{ maxWidth: "720px" }}>
+    return <div className="w-screen min-h-full bg-slate-100"><div className="mx-auto min-h-screen bg-white p-5" style={{ maxWidth: "1024px" }}>
         <Head>
             <title>Platespotting Sweden</title>
             <meta name="description" content="Platespotting Sweden" />

@@ -70,7 +70,7 @@ export default function MarkerMap() {
         props.updateLocation(result.marker._latlng);
     }
 
-    return (<div className="h-96 border">{locationSet ? <MapContainer className="h-96" center={position} zoom={17} scrollWheelZoom={true}>
+    return (<div className="h-128 border">{locationSet ? <MapContainer className="h-128" center={position} zoom={4} scrollWheelZoom={true}>
         <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

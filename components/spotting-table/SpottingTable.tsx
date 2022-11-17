@@ -24,7 +24,7 @@ const SpottingTable = () => {
           <TableRow>
             <TableCell>Nummerplåt</TableCell>
             <TableCell>Datum</TableCell>
-            {hasTeamMembers && <TableCell>Teammedlemmar</TableCell>}
+            {hasTeamMembers && <TableCell align="right">Teammedlemmar</TableCell>}
             <TableCell>Anteckning</TableCell>
           </TableRow>
         </TableHead>
@@ -37,7 +37,7 @@ const SpottingTable = () => {
               <TableCell><Plate plateNumber={spotting.plateNumber}/></TableCell>
               <TableCell>{spotting.dateSpotted}</TableCell>
               {hasTeamMembers && <TableCell>
-                <AvatarGroup>
+                <AvatarGroup max={5}>
                   {spotting.spottingTeamMembers && spotting.spottingTeamMembers.map(tm => 
                     <MemberBadge 
                       key={tm.teamMembers.id} 

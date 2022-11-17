@@ -6,6 +6,11 @@ import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useAppSelector, useAppDispatch } from './../hooks'
 import { selectAllTeamMembers, addNewTeamMember } from './../store/teamMemberSlice'
 import { setHasTeamMembers, setName } from '../store/settingsSlice';
+import TextField from '@mui/material/TextField';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import Checkbox from '@mui/material/Checkbox';
 
 const Settings: NextPage = () => {
     const supabase = useSupabaseClient()
@@ -45,7 +50,7 @@ const Settings: NextPage = () => {
         if (!newTeamMemberName) return;
         addTeamMember()
         if (teamMemberForm && teamMemberForm.current)
-        teamMemberForm.current.reset()
+            teamMemberForm.current.reset()
     }
 
     const onSubmitName = (event: any) => {
@@ -80,21 +85,23 @@ const Settings: NextPage = () => {
         <div>
             <PageTemplate>
                 <h2>Inställningar</h2>
-                <p>
-                    <input type="checkbox" onClick={toggleHasTeam} defaultChecked={hasTeamMembers} />Vi är ett team som letar tillsammans
-                </p>
-                <label htmlFor="name">{hasTeam ? 'Teamets namn' : 'Mitt namn'}</label>
+                <FormGroup>
+                    <FormControlLabel control={<Switch
+                        checked={hasTeam}
+                        onChange={toggleHasTeam}
+                        inputProps={{ 'aria-label': 'controlled' }}
+                    />} label="Slå på teamfunktionalitet" />
+                </FormGroup>
                 <form onSubmit={onSubmitName}>
-                    <input id="name" type="text" defaultValue={name} onChange={onChangeNewName} className="border block mb-4"></input>
+                    <TextField id="name" defaultValue={name} onChange={onChangeNewName} label={hasTeam ? 'Teamets namn' : 'Mitt namn'} variant="outlined" />
                     <button type="submit" className="btn-primary">Spara namn</button>
                 </form>
                 {hasTeam && <section>
                     <h2>Teammedlemmar</h2>
                     {teamMembersList()}
                     <h2>Ny teammedlem</h2>
-                    <form onSubmit={onSubmitTeamMember}  ref={teamMemberForm} className="flex flex-col">
-                        <label htmlFor="newTeamMemberName">Teammedlemmens namn</label>
-                        <input name="newTeamMemberName" onChange={onChangeNewTeamMemberName} className="border block mb-4" />
+                    <form onSubmit={onSubmitTeamMember} ref={teamMemberForm} className="flex flex-col">
+                        <TextField id="newTeamMemberName" defaultValue={newTeamMemberName} onChange={onChangeNewTeamMemberName} label="Teammedlemmens namn" variant="outlined" />
                         <label htmlFor="newTeamMemberColor">Teammedlemmens favoritfärg</label>
                         <input type="color" name="newTeamMemberColor" onChange={onChangeNewTeamMemberColor} />
                         <button type="submit" className="btn-primary">Lägg till teammedlem</button>
