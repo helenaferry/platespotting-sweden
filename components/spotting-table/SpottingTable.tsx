@@ -48,7 +48,7 @@ const SpottingTable = () => {
                   )}
                 </AvatarGroup>
               </TableCell>}
-              <TableCell>{spotting.note}</TableCell>
+              <TableCell className="w-48">{spotting.note}</TableCell>
             </TableRow>
           ))}
         </TableBody>

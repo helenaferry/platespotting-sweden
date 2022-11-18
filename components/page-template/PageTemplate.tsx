@@ -73,21 +73,23 @@ export default function PageTemplate(props: Props) {
             <link rel="icon" href="/favicon.ico" />
         </Head>
         <header className="relative text-center">
-            <div className="absolute left-0 text-left">
-                <ButtonGroup variant="text" aria-label="text button group">
-                    <Button><Link href="/"><HomeIcon /></Link></Button>
-                </ButtonGroup>
-            </div>
-            <div className="absolute right-0 text-right">
-                {session &&
+            {session &&
+                <div className="absolute left-0 text-left">
+                    <ButtonGroup variant="text" aria-label="text button group">
+                        <Button><Link href="/"><HomeIcon /></Link></Button>
+                    </ButtonGroup>
+                </div>
+            }
+            {session &&
+                <div className="absolute right-0 text-right">
+
                     <ButtonGroup variant="text" aria-label="text button group">
                         <Button onClick={signOut}>Logga ut {name ? name : session?.user.email}
                         </Button>
                         <Button><Link href="/settings"><SettingsIcon /></Link></Button>
                     </ButtonGroup>
-                }
-
-            </div>
+                </div>
+            }
             <Typography variant="h1" gutterBottom>
                 <Link href="/">Platespotting Sweden</Link>
             </Typography>
