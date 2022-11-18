@@ -12,7 +12,7 @@ const Home: NextPage = () => {
     <PageTemplate>
       <section className="text-center">
         <p>Du letar efter:</p>
-        <Plate plateNumber={nextPlate}></Plate><br />
+        <Plate plateNumber={nextPlate} large={true}></Plate><br />
         <Link href="/add">
           <button className="btn-primary">Hittad!</button>
         </Link>

@@ -13,6 +13,9 @@ module.exports = {
         'mui-blue': 'rgb(25, 118, 210)',
         'darker-blue': '#1461ad'
       },
+      fontSize: {
+        plate: '3.052rem',
+      }
     },
   },
   plugins: [],

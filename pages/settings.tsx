@@ -77,17 +77,17 @@ const Settings: NextPage = () => {
     }
 
     function teamMembersList() {
-        return <ul>
-            {teamMembers && teamMembers.map(member => { return <li key={member.name}><MemberBadge name={member.name} color={member.color} profile={member.profile} id={undefined} />{member.name}</li> })}
+        return <ul className="mb-8">
+            {teamMembers && teamMembers.map(member => { return <li className="flex gap-2 my-2" key={member.name}><MemberBadge name={member.name} color={member.color} profile={member.profile} id={undefined} />{member.name}</li> })}
         </ul>
     }
 
     return (
-        <div>
+        <div className="flex flex-col gap-8">
             <PageTemplate>
                 <Typography variant="h2" gutterBottom>
                     Inställningar
-                </Typography>
+                </Typography >
                 <FormGroup>
                     <FormControlLabel control={<Switch
                         checked={hasTeam}
@@ -95,23 +95,31 @@ const Settings: NextPage = () => {
                         inputProps={{ 'aria-label': 'controlled' }}
                     />} label="Slå på teamfunktionalitet" />
                 </FormGroup>
-                <form onSubmit={onSubmitName}>
+                <form onSubmit={onSubmitName} className="flex flex-col gap-8 py-8">
                     <TextField id="name" defaultValue={name} onChange={onChangeNewName} label={hasTeam ? 'Teamets namn' : 'Mitt namn'} variant="outlined" />
                     <button type="submit" className="btn-primary">Spara namn</button>
                 </form>
-                {hasTeam && <section>
-                    <h2>Teammedlemmar</h2>
-                    {teamMembersList()}
-                    <h2>Ny teammedlem</h2>
-                    <form onSubmit={onSubmitTeamMember} ref={teamMemberForm} className="flex flex-col">
-                        <TextField id="newTeamMemberName" defaultValue={newTeamMemberName} onChange={onChangeNewTeamMemberName} label="Teammedlemmens namn" variant="outlined" />
-                        <label htmlFor="newTeamMemberColor">Teammedlemmens favoritfärg</label>
-                        <input type="color" name="newTeamMemberColor" onChange={onChangeNewTeamMemberColor} />
-                        <button type="submit" className="btn-primary">Lägg till teammedlem</button>
-                    </form>
-                </section>}
-            </PageTemplate>
-        </div>
+                {
+                    hasTeam && <section>
+                        <Typography variant="h2" gutterBottom>
+                            Teammedlemmar
+                        </Typography >
+                        {teamMembersList()}
+                        <Typography variant="h2" gutterBottom>
+                            Lägg till ny teammedlem
+                        </Typography >
+                        <form onSubmit={onSubmitTeamMember} ref={teamMemberForm} className="flex flex-col gap-8">
+                            <TextField id="newTeamMemberName" defaultValue={newTeamMemberName} onChange={onChangeNewTeamMemberName} label="Teammedlemmens namn" variant="outlined" />
+                            <div>
+                                <label htmlFor="newTeamMemberColor">Teammedlemmens favoritfärg</label><br />
+                                <input type="color" name="newTeamMemberColor" onChange={onChangeNewTeamMemberColor} />
+                            </div>
+                            <button type="submit" className="btn-primary">Lägg till teammedlem</button>
+                        </form>
+                    </section>
+                }
+            </PageTemplate >
+        </div >
     )
 }
 export default Settings

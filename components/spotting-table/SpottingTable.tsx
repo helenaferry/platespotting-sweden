@@ -19,12 +19,12 @@ const SpottingTable = () => {
 
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+      <Table sx={{ minWidth: 650 }} aria-label="simple table" padding="none">
         <TableHead>
           <TableRow>
             <TableCell>Nummerplåt</TableCell>
             <TableCell>Datum</TableCell>
-            {hasTeamMembers && <TableCell align="right">Teammedlemmar</TableCell>}
+            {hasTeamMembers && <TableCell align="center">Teammedlemmar</TableCell>}
             <TableCell>Anteckning</TableCell>
           </TableRow>
         </TableHead>
@@ -34,19 +34,19 @@ const SpottingTable = () => {
               key={spotting.plateNumber}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
-              <TableCell><Plate plateNumber={spotting.plateNumber}/></TableCell>
+              <TableCell><Plate plateNumber={spotting.plateNumber} large={false} /></TableCell>
               <TableCell>{spotting.dateSpotted}</TableCell>
               {hasTeamMembers && <TableCell>
                 <AvatarGroup max={5}>
-                  {spotting.spottingTeamMembers && spotting.spottingTeamMembers.map(tm => 
-                    <MemberBadge 
-                      key={tm.teamMembers.id} 
-                      id={tm.teamMembers.id} 
-                      name={tm.teamMembers.name} 
-                      color={tm.teamMembers.color} 
-                      profile={undefined}/>
-              )}
-              </AvatarGroup>
+                  {spotting.spottingTeamMembers && spotting.spottingTeamMembers.map(tm =>
+                    <MemberBadge
+                      key={tm.teamMembers.id}
+                      id={tm.teamMembers.id}
+                      name={tm.teamMembers.name}
+                      color={tm.teamMembers.color}
+                      profile={undefined} />
+                  )}
+                </AvatarGroup>
               </TableCell>}
               <TableCell>{spotting.note}</TableCell>
             </TableRow>
@@ -54,7 +54,7 @@ const SpottingTable = () => {
         </TableBody>
       </Table>
     </TableContainer>
-    )
+  )
 }
 
 export default SpottingTable

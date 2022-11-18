@@ -119,7 +119,7 @@ export default function PageTemplate(props: Props) {
                     theme="light"
                 />
             ) : (
-                <div className="w-11/12">
+                <div className="w-full mb-10">
                     {props.children}
                 </div>
             )}

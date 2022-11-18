@@ -1,3 +1,4 @@
 export type PlateType = {
-  plateNumber: number
+  plateNumber: number,
+  large: boolean
 }

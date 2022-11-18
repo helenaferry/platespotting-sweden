@@ -7,6 +7,8 @@ import { useAppSelector } from './../../hooks'
 import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 import { selectAllSpottings } from './../../store/spottingsSlice'
 import Plate from './../plate/Plate'
+import MemberBadge from './../member-badge/MemberBadge'
+import AvatarGroup from '@mui/material/AvatarGroup';
 
 export default function MarkerMap() {
     const spottings = useAppSelector(selectAllSpottings)
@@ -76,8 +78,24 @@ export default function MarkerMap() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <LeafletgeoSearch />
-        {spottings.map(spotting => <Marker key={spotting.id} position={{lat: spotting.location_lat, lng: spotting.location_lng}}>
-            <Popup><Plate plateNumber={spotting.plateNumber} /></Popup>
+        {spottings.map(spotting => <Marker key={spotting.id} position={{ lat: spotting.location_lat, lng: spotting.location_lng }}>
+            <Popup>
+                <div className="text-center">
+                    <Plate plateNumber={spotting.plateNumber} large={false} /><br />
+                    {spotting.dateSpotted}<br />
+                    <AvatarGroup max={5}>
+                        {spotting.spottingTeamMembers && spotting.spottingTeamMembers.map(tm =>
+                            <MemberBadge
+                                key={tm.teamMembers.id}
+                                id={tm.teamMembers.id}
+                                name={tm.teamMembers.name}
+                                color={tm.teamMembers.color}
+                                profile={undefined} />
+
+                        )}
+                    </AvatarGroup>
+                </div>
+            </Popup>
         </Marker>)}
     </MapContainer>
         : <p>Väntar på kartan... Har du gett tillåtelse i webbläsaren att läsa position?</p>
