@@ -67,9 +67,10 @@ const AddForm: React.FunctionComponent = () => {
         if (canSave) {
             setAddSpottingStatus('pending')
             await dispatch(addNewSpotting({
-                spotting: { plateNumber: nextPlate, dateSpotted: date, note: note, profile: session?.user.id, location_lat: location_lat, location_lng: location_lng, spottingTeamMembers: undefined }, 
+                spotting: { plateNumber: nextPlate, dateSpotted: date, note: note, profile: session?.user.id, location_lat: location_lat, location_lng: location_lng, spottingTeamMembers: undefined },
                 membersSeen: membersSeen,
-                database: supabase}))
+                database: supabase
+            }))
             router.push('/list')
             setAddSpottingStatus('idle')
         }
@@ -84,7 +85,7 @@ const AddForm: React.FunctionComponent = () => {
         return <section><p>Vilka lagmedlemmar såg?</p>
             {teamMembers.map(teamMember =>
                 <div key={teamMember.id}>
-                    <input name="membersSeen" type="checkbox" value={teamMember.id} id={teamMember.id} 
+                    <input name="membersSeen" type="checkbox" value={teamMember.id} id={teamMember.id}
                         onChange={onChangeMembersSeen} />
                     <label htmlFor={teamMember.name}>{teamMember.name}</label></div>)}</section>
     }

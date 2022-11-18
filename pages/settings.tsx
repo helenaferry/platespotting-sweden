@@ -11,6 +11,7 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import Checkbox from '@mui/material/Checkbox';
+import Typography from '@mui/material/Typography';
 
 const Settings: NextPage = () => {
     const supabase = useSupabaseClient()
@@ -84,7 +85,9 @@ const Settings: NextPage = () => {
     return (
         <div>
             <PageTemplate>
-                <h2>Inställningar</h2>
+                <Typography variant="h2" gutterBottom>
+                    Inställningar
+                </Typography>
                 <FormGroup>
                     <FormControlLabel control={<Switch
                         checked={hasTeam}

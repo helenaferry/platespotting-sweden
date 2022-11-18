@@ -8,7 +8,11 @@ module.exports = {
     extend: {
       spacing: {
         '128': '32rem',
-      }
+      },
+      colors: {
+        'mui-blue': 'rgb(25, 118, 210)',
+        'darker-blue': '#1461ad'
+      },
     },
   },
   plugins: [],
