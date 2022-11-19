@@ -11,7 +11,6 @@ import { selectAllTeamMembers } from './../../store/teamMemberSlice'
 import dynamic from "next/dynamic"
 import { TeamMemberType } from '../../types/TeamMemberType';
 
-import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
