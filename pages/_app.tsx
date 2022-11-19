@@ -24,7 +24,7 @@ function MyApp({
       h1: {
         fontSize: 36,
         fontWeight: 'bold',
-        paddingTop: 42
+        paddingTop: 56
       },
       h2: {
         fontSize: 24,

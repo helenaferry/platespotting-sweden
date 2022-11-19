@@ -81,7 +81,7 @@ export default function PageTemplate(props: Props) {
                 </div>
             }
             {session &&
-                <div className="absolute right-0 text-right">
+                <div className="absolute right-0 text-right ml-10">
 
                     <ButtonGroup variant="text" aria-label="text button group">
                         <Button onClick={signOut}>Logga ut {name ? name : session?.user.email}
@@ -100,6 +100,7 @@ export default function PageTemplate(props: Props) {
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
+                        marginBottom: 2,
                         '& > *': {
                             m: 1,
                         },

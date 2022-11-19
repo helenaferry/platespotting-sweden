@@ -22,9 +22,6 @@ type FetchSettingsType = {
 }
 
 export const fetchSettings = createAsyncThunk('settings/fetchSettings', async (prop: FetchSettingsType) => {
-    console.log(
-        'fetchSettings', prop.id
-    )
     if (!prop.id) return
     let { data: settings, error } = await prop.database
         .from('profiles')
@@ -78,7 +75,7 @@ export const settingsSlice = createSlice({
                 state.status = 'loading';
             })
             .addCase(fetchSettings.fulfilled, (state, action: PayloadAction<any>) => {
-                console.log('fetchSettings fulfilled', action.payload);
+                // console.log('fetchSettings fulfilled', action.payload);
                 if (!action || !action.payload || !action.payload[0]) return;
                 state.hasTeamMembers = action.payload[0].hasTeamMembers;
                 state.name = action.payload[0].name;
@@ -86,7 +83,7 @@ export const settingsSlice = createSlice({
                 state.status = 'succeeded';
             })
             .addCase(fetchSettings.rejected, (state, action) => {
-                console.log('fetchSettings error', action.error.message);
+                // console.log('fetchSettings error', action.error.message);
                 state.status = 'failed';
                 state.error = action.error.message;
             })
@@ -97,7 +94,7 @@ export const settingsSlice = createSlice({
             .addCase(setHasTeamMembers.fulfilled, (state, action: PayloadAction<any>) => {
                 state.status = 'succeeded'
                 state.hasTeamMembers = action.payload.hasTeamMembers;
-                console.log('setHasTeamMEmbers got', action.payload)
+                // console.log('setHasTeamMEmbers got', action.payload)
             })
             .addCase(setHasTeamMembers.rejected, (state, action) => {
                 state.status = 'failed'
@@ -111,7 +108,7 @@ export const settingsSlice = createSlice({
             .addCase(setName.fulfilled, (state, action: PayloadAction<any>) => {
                 state.status = 'succeeded'
                 state.name = action.payload[0].name;
-                console.log('setName got', action.payload)
+                // console.log('setName got', action.payload)
             })
             .addCase(setName.rejected, (state, action) => {
                 state.status = 'failed'

@@ -77,8 +77,29 @@ export const addNewSpotting = createAsyncThunk("spottings/addNewSpotting",
                 return;
             }
         })
-        
         return spottingData;
+    })
+
+type UpdateSpottingType = {
+    plateNumber: number,
+    dateSpotted: string,
+    note: string,
+    // membersSeen: (TeamMemberType | undefined)[],
+    database: any
+}
+
+export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
+    async (prop: UpdateSpottingType) => {
+        const { data, error } = await prop.database
+            .from('spottings')
+            .update({ dateSpotted: prop.dateSpotted, note: prop.note })
+            .eq('plateNumber', prop.plateNumber)
+            .select()
+        if (error) {
+            console.log(error);
+            return;
+        }
+        return data;
     })
 
 export const spottingsSlice = createSlice({
@@ -95,7 +116,7 @@ export const spottingsSlice = createSlice({
             .addCase(fetchSpottings.fulfilled, (state, action: PayloadAction<any>) => {
                 state.status = 'succeeded'
                 state.spottings = state.spottings.concat(action.payload)
-                console.log('fetchSpottings succeeded', action.payload);
+                // console.log('fetchSpottings succeeded', action.payload);
             })
             .addCase(fetchSpottings.rejected, (state, action) => {
                 state.status = 'failed'
@@ -103,19 +124,39 @@ export const spottingsSlice = createSlice({
             })
             // Add new spotting
             .addCase(addNewSpotting.pending, (state, action) => {
-                console.log('addNewSpotting loading');
+                // console.log('addNewSpotting loading');
                 state.status = 'loading'
             })
             .addCase(addNewSpotting.fulfilled, (state, action: PayloadAction<any>) => {
-                console.log('addNewSpotting succeeded', action.payload[0]);
+                // console.log('addNewSpotting succeeded', action.payload[0]);
                 state.status = 'succeeded'
                 if (!action.payload) return
                 const newSpotting = action.payload[0];
                 state.spottings.unshift(newSpotting)
-                
+
             })
             .addCase(addNewSpotting.rejected, (state, action) => {
-                console.log('addNewSpotting failed', action.error.message);
+                // console.log('addNewSpotting failed', action.error.message);
+                state.status = 'failed'
+                state.error = action.error.message || '';
+            })
+            // Update spotting
+            .addCase(updateSpotting.pending, (state, action) => {
+                console.log('updateSpotting loading');
+                state.status = 'loading'
+            })
+            .addCase(updateSpotting.fulfilled, (state, action: PayloadAction<any>) => {
+                console.log('updateSpotting succeeded', action.payload[0]);
+                state.status = 'succeeded'
+                if (!action.payload) return
+                const newSpotting = action.payload[0];
+                console.log(newSpotting);
+                const index = state.spottings.findIndex(spotting => spotting.plateNumber === newSpotting.plateNumber);
+                if (index < 0) return;
+                state.spottings[index] = newSpotting;
+            })
+            .addCase(updateSpotting.rejected, (state, action) => {
+                console.log('updateSpotting failed', action.error.message);
                 state.status = 'failed'
                 state.error = action.error.message || '';
             })
