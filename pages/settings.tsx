@@ -10,7 +10,9 @@ import TextField from '@mui/material/TextField';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
-import Checkbox from '@mui/material/Checkbox';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 
 const Settings: NextPage = () => {
@@ -23,6 +25,7 @@ const Settings: NextPage = () => {
     const status = useAppSelector(state => state.settings.status)
     const error = useAppSelector(state => state.spottings.error)
     const teamMemberForm = useRef<HTMLFormElement>(null);
+    const [editingTeamMember, setEditingTeamMember] = useState(0)
 
     const [hasTeam, setHasTeam] = useState(hasTeamMembers);
     const [newName, setNewName] = useState(name);
@@ -46,6 +49,11 @@ const Settings: NextPage = () => {
         setNewTeamMemberColor(event.target.value)
     }
 
+    const onChangeEditingTeamMember = (event: any) => {
+        console.log(event.target.value);
+        setEditingTeamMember(event.target.value);
+    }
+
     const onSubmitTeamMember = (event: any) => {
         event.preventDefault()
         if (!newTeamMemberName) return;
@@ -64,7 +72,7 @@ const Settings: NextPage = () => {
             {
                 teamMember:
                 {
-                    name: newTeamMemberName, color: newTeamMemberColor, profile: session?.user.id, id: undefined
+                    name: newTeamMemberName, color: newTeamMemberColor, profile: session?.user.id, id: 0
                 },
                 supabase: supabase
             }
@@ -77,9 +85,16 @@ const Settings: NextPage = () => {
     }
 
     function teamMembersList() {
-        return <ul className="mb-8">
-            {teamMembers && teamMembers.map(member => { return <li className="flex gap-2 my-2" key={member.name}><MemberBadge name={member.name} color={member.color} profile={member.profile} id={undefined} />{member.name}</li> })}
-        </ul>
+        return <table className="w-full mb-8"><tbody>
+            {teamMembers && teamMembers.map(member => {
+                return <tr key={member.name}>
+                    <td className="min-w-[50%]">
+                        {(editingTeamMember == member.id) ? <div>editing</div> : <div className="flex gap-2 my-2"><MemberBadge name={member.name} color={member.color} profile={member.profile} id={member.id} />{member.name}</div>}
+                    </td>
+                    <td className="text-right"><IconButton onClick={onChangeEditingTeamMember} value={member.id}><EditIcon className="pointer-events-none" /></IconButton></td>
+                </tr>
+            })}
+        </tbody></table>
     }
 
     return (

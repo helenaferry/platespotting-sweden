@@ -7,7 +7,6 @@ import { selectAllSpottings, updateSpotting } from './../../store/spottingsSlice
 import { selectAllTeamMembers } from './../../store/teamMemberSlice'
 import { TeamMemberType } from '../../types/TeamMemberType';
 
-
 import MemberBadge from './../member-badge/MemberBadge'
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -70,7 +69,7 @@ const SpottingTable = () => {
     setMembersSeen(Array.from(
       document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'))
       .filter(checkbox => checkbox.checked)
-      .map(checkbox => teamMembers.find(tm => tm.id == checkbox.value)));
+      .map(checkbox => teamMembers.find(tm => tm.id == parseInt(checkbox.value))));
   }
 
   const saveChanges = async (event: any) => {
