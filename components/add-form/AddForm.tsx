@@ -74,7 +74,7 @@ const AddForm: React.FunctionComponent = () => {
         if (canSave) {
             setAddSpottingStatus('pending')
             await dispatch(addNewSpotting({
-                spotting: { plateNumber: nextPlate, dateSpotted: date, note: note, profile: session?.user.id, location_lat: location_lat, location_lng: location_lng, spottingTeamMembers: undefined },
+                spotting: { plateNumber: nextPlate, dateSpotted: date, note: note, profile: session?.user.id, location_lat: location_lat, location_lng: location_lng, spottingTeamMembers: undefined, id: 0 },
                 membersSeen: membersSeen,
                 database: supabase
             }))

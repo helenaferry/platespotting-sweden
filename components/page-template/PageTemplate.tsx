@@ -40,6 +40,15 @@ export default function PageTemplate(props: Props) {
         dispatch(fetchSettings({ id: session?.user.id, database: supabase }))
     }, [session])
 
+    supabase
+        .channel('*')
+        .on('postgres_changes', { event: '*', schema: '*' }, payload => {
+            if (payload.table === 'spottingTeamMembers') {
+                location.reload() // ugly...
+            }
+        })
+        .subscribe()
+
     /* supabase
          .channel('*')
          .on('postgres_changes', { event: '*', schema: '*' }, payload => {

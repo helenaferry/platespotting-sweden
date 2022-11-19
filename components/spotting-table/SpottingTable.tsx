@@ -1,9 +1,11 @@
 
-import { useSupabaseClient } from '@supabase/auth-helpers-react'
+import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import Plate from './../plate/Plate'
 import { useState } from 'react';
 import { useAppSelector, useAppDispatch } from './../../hooks'
 import { selectAllSpottings, updateSpotting } from './../../store/spottingsSlice'
+import { selectAllTeamMembers } from './../../store/teamMemberSlice'
+import { TeamMemberType } from '../../types/TeamMemberType';
 
 
 import MemberBadge from './../member-badge/MemberBadge'
@@ -19,8 +21,14 @@ import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
+import FormLabel from '@mui/material/FormLabel';
+import FormControl from '@mui/material/FormControl';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 
 const SpottingTable = () => {
+  const session = useSession()
   const spottings = useAppSelector(selectAllSpottings)
   const status = useAppSelector(state => state.spottings.status)
   const hasTeamMembers = useAppSelector(state => state.settings.hasTeamMembers)
@@ -29,6 +37,8 @@ const SpottingTable = () => {
   const [note, setNote] = useState('');
   const dispatch = useAppDispatch()
   const supabase = useSupabaseClient()
+  const teamMembers = useAppSelector(selectAllTeamMembers)
+  const [membersSeen, setMembersSeen] = useState<(TeamMemberType | undefined)[]>([])
 
   function dayDiff(date1: string, date2: string) {
     let d1: Date = new Date(date1);
@@ -55,12 +65,22 @@ const SpottingTable = () => {
     setNote(event.target.value);
   }
 
+  const onChangeMembersSeen = (event: any) => {
+    console.log('onChangeMembersSeen');
+    setMembersSeen(Array.from(
+      document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'))
+      .filter(checkbox => checkbox.checked)
+      .map(checkbox => teamMembers.find(tm => tm.id == checkbox.value)));
+  }
+
   const saveChanges = async (event: any) => {
+    console.log(event.target.value);
     await dispatch(updateSpotting({
-      plateNumber: editing,
+      id: event.target.value,
+      profile: (session) ? session?.user.id : '',
       dateSpotted: date,
       note: note,
-      // membersSeen: membersSeen,
+      membersSeen: membersSeen,
       database: supabase
     }))
     setEditing(0);
@@ -92,7 +112,23 @@ const SpottingTable = () => {
                   <TextField type="date" id="date" defaultValue={spotting.dateSpotted} onChange={onChangeDate} label="Datum" variant="outlined" />
                   : spotting.dateSpotted}</TableCell>
                 <TableCell>{index >= 0 && index < spottings.length - 1 && dayDiff(spotting.dateSpotted, spottings[index + 1].dateSpotted)}</TableCell>
-                {hasTeamMembers && <TableCell>
+                {hasTeamMembers && <TableCell>{editing == spotting.plateNumber ?
+                  <FormControl sx={{ m: 3 }} variant="standard">
+                    <FormLabel>Vilka teammedlemmar såg den?</FormLabel>
+                    <FormGroup row>
+                      {teamMembers && teamMembers.map(tm =>
+                        <FormControlLabel key={tm.id}
+                          control={
+                            <Checkbox value={tm.id}
+                              defaultChecked={spotting.spottingTeamMembers && spotting.spottingTeamMembers.findIndex(m => m.teamMembers.id == tm.id) >= 0}
+                              onChange={onChangeMembersSeen} name="membersSeen" />
+                          }
+                          label={tm.name}
+                        />
+                      )}
+                    </FormGroup>
+                  </FormControl>
+                  :
                   <AvatarGroup max={5}>
                     {spotting.spottingTeamMembers && spotting.spottingTeamMembers.map(tm =>
                       <MemberBadge
@@ -102,12 +138,12 @@ const SpottingTable = () => {
                         color={tm.teamMembers.color}
                         profile={undefined} />
                     )}
-                  </AvatarGroup>
+                  </AvatarGroup>}
                 </TableCell>}
                 <TableCell className={(editing == spotting.plateNumber) ? "w-48 py-5 pr-1" : "w-48"}>{editing == spotting.plateNumber ?
                   <TextField type="text" id="note" defaultValue={spotting.note} onChange={onChangeNote} label="Anteckning" variant="outlined" multiline minRows={3} />
                   : spotting.note}</TableCell>
-                <TableCell align="right" className="pr-2">{editing == spotting.plateNumber ? <IconButton onClick={saveChanges} value={spotting.plateNumber}><SaveIcon className="pointer-events-none" /></IconButton> :
+                <TableCell align="right" className="pr-2">{editing == spotting.plateNumber ? <IconButton onClick={saveChanges} value={spotting.id}><SaveIcon className="pointer-events-none" /></IconButton> :
                   <IconButton onClick={onChangeEditing} value={spotting.plateNumber}><EditIcon className="pointer-events-none" /></IconButton>}
                 </TableCell>
               </TableRow>

@@ -26,6 +26,7 @@ export const fetchSpottings = createAsyncThunk('spottings/fetchSpottings', async
     let { data: spottings, error } = await useSupabaseClient()
         .from('spottings')
         .select(`
+        id,
         plateNumber,
         location_lat,
         location_lng,
@@ -81,25 +82,52 @@ export const addNewSpotting = createAsyncThunk("spottings/addNewSpotting",
     })
 
 type UpdateSpottingType = {
-    plateNumber: number,
+    id: number,
+    profile: string,
     dateSpotted: string,
     note: string,
-    // membersSeen: (TeamMemberType | undefined)[],
+    membersSeen: (TeamMemberType | undefined)[],
     database: any
 }
 
 export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
     async (prop: UpdateSpottingType) => {
-        const { data, error } = await prop.database
+        if (!prop.id) return;
+        const { data: updatedData, error: updateError } = await prop.database
             .from('spottings')
             .update({ dateSpotted: prop.dateSpotted, note: prop.note })
-            .eq('plateNumber', prop.plateNumber)
+            .eq('id', prop.id)
             .select()
-        if (error) {
-            console.log(error);
+        if (updateError) {
+            console.log(updateError);
             return;
         }
-        return data;
+
+        const { data: deleteMappingsData, error: deleteMappingsError } = await prop.database
+            .from('spottingTeamMembers')
+            .delete()
+            .eq('spotting', prop.id)
+        if (deleteMappingsError) {
+            console.log(deleteMappingsError);
+            return;
+        }
+
+        if (!prop.membersSeen || prop.membersSeen.length < 1) {
+            return updatedData;
+        }
+        prop.membersSeen.map(async member => {
+            if (!member) return;
+            const { data, error: tmError } = await prop.database
+                .from('spottingTeamMembers')
+                .insert({ teamMember: member.id, spotting: prop.id, profile: prop.profile })
+                .select()
+            if (tmError) {
+                console.log(tmError);
+                return;
+            }
+        })
+
+        return updatedData;
     })
 
 export const spottingsSlice = createSlice({
