@@ -67,6 +67,11 @@ const Settings: NextPage = () => {
         dispatch(setName({ name: newName, id: session?.user.id + '', database: supabase }))
     }
 
+    const saveTeamMemberChanges = () => {
+        console.log('TBD save team member changes');
+        setEditingTeamMember(0);
+    }
+
     async function addTeamMember() {
         dispatch(addNewTeamMember(
             {
@@ -89,9 +94,15 @@ const Settings: NextPage = () => {
             {teamMembers && teamMembers.map(member => {
                 return <tr key={member.name}>
                     <td className="min-w-[50%]">
-                        {(editingTeamMember == member.id) ? <div>editing</div> : <div className="flex gap-2 my-2"><MemberBadge name={member.name} color={member.color} profile={member.profile} id={member.id} />{member.name}</div>}
+                        {(editingTeamMember == member.id) ? <div>
+                            <label htmlFor="newTeamMemberColor">Teammedlemmens favoritfärg</label><br />
+                            <input type="color" name="newTeamMemberColor" onChange={onChangeNewTeamMemberColor} />
+                            <TextField id="newTeamMemberName" defaultValue={newTeamMemberName} onChange={onChangeNewTeamMemberName} label="Teammedlemmens namn" variant="outlined" />
+                        </div> : <div className="flex gap-2 my-2"><MemberBadge name={member.name} color={member.color} profile={member.profile} id={member.id} />{member.name}</div>}
                     </td>
-                    <td className="text-right"><IconButton onClick={onChangeEditingTeamMember} value={member.id}><EditIcon className="pointer-events-none" /></IconButton></td>
+                    <td className="text-right">{(editingTeamMember == member.id) ?
+                        <IconButton onClick={saveTeamMemberChanges} value={member.id}><SaveIcon className="pointer-events-none" /></IconButton> :
+                        <IconButton onClick={onChangeEditingTeamMember} value={member.id}><EditIcon className="pointer-events-none" /></IconButton>}</td>
                 </tr>
             })}
         </tbody></table>
