@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from './store'
 import { TeamMemberType } from '../types/TeamMemberType'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
+import { create } from 'domain'
 
 interface TeamMembersState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed',
@@ -25,15 +26,15 @@ export const fetchTeamMembers = createAsyncThunk('teamMembers/fetchTeamMembers',
 
 type AddNewTeamMemberType = {
     teamMember: TeamMemberType,
-    supabase: any
+    database: any
 }
 
 export const addNewTeamMember = createAsyncThunk('teamMembers/addNewTeamMember', async (prop: AddNewTeamMemberType) => {
     console.log('teamMemberSlice to add ', prop.teamMember);
-    const { data, error } = await prop.supabase
+    const { data, error } = await prop.database
         .from('teamMembers')
         .insert(
-            prop.teamMember
+            { name: prop.teamMember.name, color: prop.teamMember.color, profile: prop.teamMember.profile }
         ).select()
     if (error) {
         console.log(error)
@@ -41,14 +42,34 @@ export const addNewTeamMember = createAsyncThunk('teamMembers/addNewTeamMember',
     return data;
 })
 
+type EditTeamMemberType = {
+    id: number,
+    name: string,
+    color: string,
+    database: any
+}
+
+export const updateTeamMember = createAsyncThunk('teamMembers/updateTeamMember', async (prop: EditTeamMemberType) => {
+    const { data, error } = await prop.database
+        .from('teamMembers')
+        .update({ name: prop.name, color: prop.color })
+        .eq('id', prop.id)
+        .select()
+    if (error) {
+        console.log(error)
+    }
+    return data;
+})
+
+
 
 export const teamMembersSlice = createSlice({
     name: 'teamMembers',
     initialState,
     reducers: {
-      /*  findTeamMember: (state, action) => {
-            return state.teamMembers.find(teamMember => teamMember.id == action.payload.id);
-        }*/
+        /*  findTeamMember: (state, action) => {
+              return state.teamMembers.find(teamMember => teamMember.id == action.payload.id);
+          }*/
     },
     extraReducers(builder) {
         builder
@@ -77,6 +98,26 @@ export const teamMembersSlice = createSlice({
                 console.log('teamMembers now', state.teamMembers)
             })
             .addCase(addNewTeamMember.rejected, (state, action) => {
+                state.status = 'failed'
+                state.error = action.error.message || '';
+                console.log('failed', action.error.message)
+            })
+            // Update team member
+            .addCase(updateTeamMember.pending, (state, action) => {
+                state.status = 'loading'
+                console.log('loading');
+            })
+            .addCase(updateTeamMember.fulfilled, (state, action: PayloadAction<any>) => {
+                state.status = 'succeeded'
+                console.log('succeeded', action.payload);
+                if (!action.payload) return
+                const editedTm = action.payload[0];
+                console.log(editedTm);
+                const index = state.teamMembers.findIndex(tm => tm.id === editedTm.id);
+                if (index < 0) return;
+                state.teamMembers[index] = editedTm;
+            })
+            .addCase(updateTeamMember.rejected, (state, action) => {
                 state.status = 'failed'
                 state.error = action.error.message || '';
                 console.log('failed', action.error.message)

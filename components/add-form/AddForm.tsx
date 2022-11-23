@@ -50,7 +50,7 @@ const AddForm: React.FunctionComponent = () => {
         setMembersSeen(Array.from(
             document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'))
             .filter(checkbox => checkbox.checked)
-            .map(checkbox => teamMembers.find(tm => tm.id == checkbox.value)));
+            .map(checkbox => teamMembers.find(tm => tm.id == parseInt(checkbox.value))));
     }
 
     const onSubmit = (event: any) => {
@@ -74,7 +74,7 @@ const AddForm: React.FunctionComponent = () => {
         if (canSave) {
             setAddSpottingStatus('pending')
             await dispatch(addNewSpotting({
-                spotting: { plateNumber: nextPlate, dateSpotted: date, note: note, profile: session?.user.id, location_lat: location_lat, location_lng: location_lng, spottingTeamMembers: undefined, id: 0 },
+                spotting: { plateNumber: nextPlate, dateSpotted: date, note: note, profile: session?.user.id, location_lat: location_lat, location_lng: location_lng, spottingTeamMembers: undefined, id: undefined },
                 membersSeen: membersSeen,
                 database: supabase
             }))
