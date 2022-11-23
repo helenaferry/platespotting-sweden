@@ -12,8 +12,10 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
+import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import Delete from '@mui/icons-material/Delete';
 
 const Settings: NextPage = () => {
     const supabase = useSupabaseClient()
@@ -70,6 +72,12 @@ const Settings: NextPage = () => {
     const saveTeamMemberChanges = () => {
         console.log('TBD save team member changes');
         setEditingTeamMember(0);
+        alert('TBD save');
+    }
+
+    const deleteTeamMember = () => {
+        console.log('TBD delete');
+        alert('TBD delete');
     }
 
     async function addTeamMember() {
@@ -94,15 +102,16 @@ const Settings: NextPage = () => {
             {teamMembers && teamMembers.map(member => {
                 return <tr key={member.name}>
                     <td className="min-w-[50%]">
-                        {(editingTeamMember == member.id) ? <div>
-                            <label htmlFor="newTeamMemberColor">Teammedlemmens favoritfärg</label><br />
-                            <input type="color" name="newTeamMemberColor" onChange={onChangeNewTeamMemberColor} />
-                            <TextField id="newTeamMemberName" defaultValue={newTeamMemberName} onChange={onChangeNewTeamMemberName} label="Teammedlemmens namn" variant="outlined" />
+                        {(editingTeamMember == member.id) ? <div className="flex">
+                            <div><label htmlFor="newTeamMemberColor">Färg</label><br />
+                                <input type="color" name="newTeamMemberColor" onChange={onChangeNewTeamMemberColor} value={member.color} /></div>
+                            <TextField id="newTeamMemberName" defaultValue={member.name} onChange={onChangeNewTeamMemberName} label="Namn" variant="outlined" />
                         </div> : <div className="flex gap-2 my-2"><MemberBadge name={member.name} color={member.color} profile={member.profile} id={member.id} />{member.name}</div>}
                     </td>
                     <td className="text-right">{(editingTeamMember == member.id) ?
                         <IconButton onClick={saveTeamMemberChanges} value={member.id}><SaveIcon className="pointer-events-none" /></IconButton> :
-                        <IconButton onClick={onChangeEditingTeamMember} value={member.id}><EditIcon className="pointer-events-none" /></IconButton>}</td>
+                        <div className="flex justify-end"><IconButton onClick={deleteTeamMember} value={member.id}><DeleteIcon className="pointer-events-none" /></IconButton>
+                            <IconButton onClick={onChangeEditingTeamMember} value={member.id}><EditIcon className="pointer-events-none" /></IconButton></div>}</td>
                 </tr>
             })}
         </tbody></table>
