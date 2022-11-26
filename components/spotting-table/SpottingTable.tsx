@@ -129,7 +129,7 @@ const SpottingTable = () => {
                 key={index}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
-                <TableCell><Plate plateNumber={spotting.plateNumber} large={false} />{editing == spotting.id && changesToMembersSeen(spotting) ? <span>changes</span> : <span>no changes</span>}</TableCell>
+                <TableCell><Plate plateNumber={spotting.plateNumber} large={false} /></TableCell>
                 <TableCell>{editing == spotting.plateNumber ?
                   <TextField type="date" id="date" defaultValue={spotting.dateSpotted} onChange={onChangeDate} label="Datum" variant="outlined" />
                   : spotting.dateSpotted}</TableCell>

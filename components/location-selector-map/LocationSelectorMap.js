@@ -40,7 +40,6 @@ export default function LocationSelectorMap(props) {
         dragend() {
           const marker = markerRef.current
           if (marker != null) {
-            console.log('dragend', marker.getLatLng())
             setPosition(marker.getLatLng())
             props.updateLocation(marker.getLatLng())
           }
