@@ -5,6 +5,7 @@ import { useAppSelector, useAppDispatch } from './../../hooks'
 import { fetchSpottings } from './../../store/spottingsSlice'
 import { fetchTeamMembers } from './../../store/teamMemberSlice'
 import { fetchSettings } from './../../store/settingsSlice';
+import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
 import Typography from '@mui/material/Typography';
@@ -27,6 +28,7 @@ export default function PageTemplate(props: Props) {
     //  const settingsStatus = useAppSelector(state => state.settings.status)
     const name = useAppSelector(state => state.settings.name)
     const dispatch = useAppDispatch()
+    const router = useRouter()
 
     if (status === 'idle') {
         dispatch(fetchSpottings())
@@ -44,7 +46,7 @@ export default function PageTemplate(props: Props) {
         .channel('*')
         .on('postgres_changes', { event: '*', schema: '*' }, payload => {
             if (payload.table === 'spottingTeamMembers') {
-                location.reload() // ugly...
+                router.reload() // ugly...
             }
         })
         .subscribe()
@@ -72,7 +74,7 @@ export default function PageTemplate(props: Props) {
 
     async function signOut() {
         const { error } = await supabase.auth.signOut()
-        location.reload()
+        router.reload()
     }
 
     return <div className="w-screen min-h-full bg-slate-100"><div className="p-2 mx-auto min-h-screen bg-white" style={{ maxWidth: "1024px" }}>

@@ -3,6 +3,7 @@ import type { RootState } from './store'
 import { SpottingType } from '../types/SpottingType'
 import { TeamMemberType } from '../types/TeamMemberType'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
+import finalPropsSelectorFactory from 'react-redux/es/connect/selectorFactory'
 
 interface SpottingsState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed',
@@ -33,7 +34,6 @@ export const fetchSpottings = createAsyncThunk('spottings/fetchSpottings', async
         dateSpotted,
         note,
         spottingTeamMembers!fk_spotting_teammember (
-          teamMember,
             teamMembers!fk_spotting_teammember2(
                 name,
                 color,
@@ -53,8 +53,7 @@ type AddNewSpottingType = {
 }
 
 export const addNewSpotting = createAsyncThunk("spottings/addNewSpotting",
-    async (prop: AddNewSpottingType, { getState }) => {
-        const state = getState();
+    async (prop: AddNewSpottingType) => {
         const { data: spottingData, error: spottingError } = await prop.database
             .from('spottings')
             .insert(
@@ -86,12 +85,14 @@ type UpdateSpottingType = {
     profile: string,
     dateSpotted: string,
     note: string,
+    membersSeenUpdated: boolean;
     membersSeen: (TeamMemberType | undefined)[],
     database: any
 }
 
 export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
-    async (prop: UpdateSpottingType) => {
+    async (prop: UpdateSpottingType, { getState }) => {
+        const state: SpottingsState = getState() as SpottingsState;
         if (!prop.id) return;
         const { data: updatedData, error: updateError } = await prop.database
             .from('spottings')
@@ -103,30 +104,38 @@ export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
             return;
         }
 
-        const { data: deleteMappingsData, error: deleteMappingsError } = await prop.database
-            .from('spottingTeamMembers')
-            .delete()
-            .eq('spotting', prop.id)
-        if (deleteMappingsError) {
-            console.log(deleteMappingsError);
-            return;
-        }
-
-        if (!prop.membersSeen || prop.membersSeen.length < 1) {
-            return updatedData;
-        }
-        prop.membersSeen.map(async member => {
-            if (!member) return;
-            const { data, error: tmError } = await prop.database
+        if (prop.membersSeenUpdated) {
+            console.log(
+                'update members seen plz'
+            )
+            const { data: deleteMappingsData, error: deleteMappingsError } = await prop.database
                 .from('spottingTeamMembers')
-                .insert({ teamMember: member.id, spotting: prop.id, profile: prop.profile })
-                .select()
-            if (tmError) {
-                console.log(tmError);
+                .delete()
+                .eq('spotting', prop.id)
+            if (deleteMappingsError) {
+                console.log(deleteMappingsError);
                 return;
             }
-        })
 
+            if (!prop.membersSeen || prop.membersSeen.length < 1) {
+                return updatedData;
+            }
+            prop.membersSeen.map(async member => {
+                if (!member) return;
+                const { data, error: tmError } = await prop.database
+                    .from('spottingTeamMembers')
+                    .insert({ teamMember: member.id, spotting: prop.id, profile: prop.profile })
+                    .select()
+                if (tmError) {
+                    console.log(tmError);
+                    return;
+                }
+            })
+        } else {
+            console.log('no update members seen yo')
+            let spotting = state.spottings.spottings.find(spotting => spotting.id == prop.id);
+            updatedData[0].spottingTeamMembers = spotting.spottingTeamMembers;
+        }
         return updatedData;
     })
 

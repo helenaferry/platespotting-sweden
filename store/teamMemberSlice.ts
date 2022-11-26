@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from './store'
 import { TeamMemberType } from '../types/TeamMemberType'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
-import { create } from 'domain'
 
 interface TeamMembersState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed',
@@ -127,6 +126,6 @@ export const teamMembersSlice = createSlice({
 
 // export const { findTeamMember } = teamMembersSlice.actions
 
-export const selectAllTeamMembers = (state: RootState) => state.teamMembers.teamMembers
+export const selectAllTeamMembers = (state: RootState) => [...state.teamMembers.teamMembers].sort((a, b) => a.id - b.id)
 
 export default teamMembersSlice.reducer
