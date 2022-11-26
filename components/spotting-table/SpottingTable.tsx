@@ -25,6 +25,7 @@ import FormControl from '@mui/material/FormControl';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
+import { SpottingType } from '../../types/SpottingType';
 
 const SpottingTable = () => {
   const session = useSession()
@@ -53,7 +54,11 @@ const SpottingTable = () => {
     if (!spotting) return;
     setDate(spotting.dateSpotted);
     setNote(spotting.note);
-    setEditing(spotting.plateNumber)
+    let membersSeen = spotting.spottingTeamMembers && spotting.spottingTeamMembers.map(tm => ({ name: tm.teamMembers.name, color: tm.teamMembers.color, id: tm.teamMembers.id, profile: tm.teamMembers.profile }));
+    if (membersSeen && membersSeen.length > 0) {
+      setMembersSeen(membersSeen);
+    }
+    setEditing(spotting.plateNumber);
   }
 
   const onChangeDate = (event: any) => {
@@ -65,7 +70,6 @@ const SpottingTable = () => {
   }
 
   const onChangeMembersSeen = (event: any) => {
-    console.log('onChangeMembersSeen');
     setMembersSeen(Array.from(
       document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'))
       .filter(checkbox => checkbox.checked)
@@ -73,16 +77,35 @@ const SpottingTable = () => {
   }
 
   const saveChanges = async (event: any) => {
-    console.log(event.target.value);
+    let spotting = spottings.find(spotting => spotting.plateNumber == event.target.value);
     await dispatch(updateSpotting({
       id: event.target.value,
       profile: (session) ? session?.user.id : '',
       dateSpotted: date,
       note: note,
+      membersSeenUpdated: changesToMembersSeen(spotting),
       membersSeen: membersSeen,
       database: supabase
     }))
     setEditing(0);
+  }
+
+  const changesMade = (spotting: SpottingType) => {
+    return spotting.dateSpotted != date || spotting.note != note || changesToMembersSeen(spotting);
+  }
+
+  const changesToMembersSeen = (spotting: SpottingType | undefined) => {
+    let arr1: number[] = [];
+    if (membersSeen && membersSeen.length > 0) {
+      arr1 = membersSeen.map(m => m.id);
+    }
+    let arr2: number[] = [];
+    if (spotting && spotting.spottingTeamMembers && spotting.spottingTeamMembers.length > 0) {
+      arr2 = spotting.spottingTeamMembers.map(m => m.teamMembers.id);
+    }
+    arr1.sort()
+    arr2.sort()
+    return arr1 + "" != arr2 + ""
   }
 
   return (
@@ -106,7 +129,7 @@ const SpottingTable = () => {
                 key={index}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
-                <TableCell><Plate plateNumber={spotting.plateNumber} large={false} /></TableCell>
+                <TableCell><Plate plateNumber={spotting.plateNumber} large={false} />{editing == spotting.id && changesToMembersSeen(spotting) ? <span>changes</span> : <span>no changes</span>}</TableCell>
                 <TableCell>{editing == spotting.plateNumber ?
                   <TextField type="date" id="date" defaultValue={spotting.dateSpotted} onChange={onChangeDate} label="Datum" variant="outlined" />
                   : spotting.dateSpotted}</TableCell>
@@ -115,11 +138,11 @@ const SpottingTable = () => {
                   <FormControl sx={{ m: 3 }} variant="standard">
                     <FormLabel>Vilka teammedlemmar såg den?</FormLabel>
                     <FormGroup row>
-                      {teamMembers && teamMembers.map(tm =>
+                      {teamMembers && [...teamMembers].sort((a, b) => a.id - b.id).map(tm =>
                         <FormControlLabel key={tm.id}
                           control={
                             <Checkbox value={tm.id}
-                              defaultChecked={spotting.spottingTeamMembers && spotting.spottingTeamMembers.findIndex(m => m.teamMembers.id == tm.id) >= 0}
+                              checked={membersSeen && membersSeen.length > 0 && membersSeen.findIndex(m => m.id == tm.id) >= 0}
                               onChange={onChangeMembersSeen} name="membersSeen" />
                           }
                           label={tm.name}
@@ -129,7 +152,7 @@ const SpottingTable = () => {
                   </FormControl>
                   :
                   <AvatarGroup max={5}>
-                    {spotting.spottingTeamMembers && spotting.spottingTeamMembers.map(tm =>
+                    {spotting.spottingTeamMembers && [...spotting.spottingTeamMembers].sort((a, b) => a.teamMembers.id - b.teamMembers.id).map(tm =>
                       <MemberBadge
                         key={tm.teamMembers.id}
                         id={tm.teamMembers.id}
@@ -142,7 +165,7 @@ const SpottingTable = () => {
                 <TableCell className={(editing == spotting.plateNumber) ? "w-48 py-5 pr-1" : "w-48"}>{editing == spotting.plateNumber ?
                   <TextField type="text" id="note" defaultValue={spotting.note} onChange={onChangeNote} label="Anteckning" variant="outlined" multiline minRows={3} />
                   : spotting.note}</TableCell>
-                <TableCell align="right" className="pr-2">{editing == spotting.plateNumber ? <IconButton onClick={saveChanges} value={spotting.id}><SaveIcon className="pointer-events-none" /></IconButton> :
+                <TableCell align="right" className="pr-2">{editing == spotting.plateNumber ? <IconButton disabled={!changesMade(spotting)} onClick={saveChanges} value={spotting.id}><SaveIcon className="pointer-events-none" /></IconButton> :
                   <IconButton onClick={onChangeEditing} value={spotting.plateNumber}><EditIcon className="pointer-events-none" /></IconButton>}
                 </TableCell>
               </TableRow>
