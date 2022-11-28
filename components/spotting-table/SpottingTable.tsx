@@ -97,7 +97,7 @@ const SpottingTable = () => {
   const changesToMembersSeen = (spotting: SpottingType | undefined) => {
     let arr1: number[] = [];
     if (membersSeen && membersSeen.length > 0) {
-      arr1 = membersSeen.map(m => m.id);
+      arr1 = membersSeen.map(m => m.id); //eslint-disable-line
     }
     let arr2: number[] = [];
     if (spotting && spotting.spottingTeamMembers && spotting.spottingTeamMembers.length > 0) {
