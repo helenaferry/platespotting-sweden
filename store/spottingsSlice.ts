@@ -213,4 +213,21 @@ export const selectNextPlate = (state: RootState) => {
 
 export const selectAllSpottings = (state: RootState) => state.spottings.spottings
 
+function dayDiff(date1: string, date2: string) {
+    let d1: Date = new Date(date1);
+    let d2: Date = new Date(date2);
+    let timeInMillisec: number = d1.getTime() - d2.getTime();
+    let daysBetweenDates: number = Math.ceil(timeInMillisec / (1000 * 60 * 60 * 24));
+    return daysBetweenDates;
+}
+
+export const selectDaysSince = (state: RootState) => state.spottings.spottings.map((sp, index) => {
+    let plateBefore = (state.spottings.spottings.length > index) ? state.spottings.spottings[index + 1] : null;
+    let plateNumberBefore = (plateBefore) ? plateBefore.plateNumber : '';
+    let dateBefore = (plateBefore) ? plateBefore.dateSpotted : '';
+    let daysSince = (plateBefore) ? dayDiff(sp.dateSpotted, plateBefore.dateSpotted) : -1;
+
+    return { plateNumber: sp.plateNumber, plateBefore: plateNumberBefore, date: sp.dateSpotted, dateBefore: dateBefore, daysSince: daysSince }
+})
+
 export default spottingsSlice.reducer

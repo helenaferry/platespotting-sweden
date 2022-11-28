@@ -120,6 +120,7 @@ export default function PageTemplate(props: Props) {
                     <ButtonGroup variant="text" aria-label="text button group">
                         <Button><Link href="/list">Lista alla</Link></Button>
                         <Button><Link href="/map">Karta</Link></Button>
+                        <Button><Link href="/stats">Statistik</Link></Button>
                         <Button><Link href="/add">Lägg till</Link></Button>
                     </ButtonGroup>
                 </Box>
