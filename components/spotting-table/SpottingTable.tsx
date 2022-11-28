@@ -95,9 +95,9 @@ const SpottingTable = () => {
   }
 
   const changesToMembersSeen = (spotting: SpottingType | undefined) => {
-    let arr1: number[] = [];
+    let arr1: (number | undefined)[] = [];
     if (membersSeen && membersSeen.length > 0) {
-      arr1 = membersSeen.map(m => m.id); //eslint-disable-line
+      arr1 = membersSeen.map(m => m?.id);
     }
     let arr2: number[] = [];
     if (spotting && spotting.spottingTeamMembers && spotting.spottingTeamMembers.length > 0) {
@@ -142,7 +142,7 @@ const SpottingTable = () => {
                         <FormControlLabel key={tm.id}
                           control={
                             <Checkbox value={tm.id}
-                              checked={membersSeen && membersSeen.length > 0 && membersSeen.findIndex(m => m.id == tm.id) >= 0}
+                              checked={membersSeen && membersSeen.length > 0 && membersSeen.findIndex(m => m?.id == tm.id) >= 0}
                               onChange={onChangeMembersSeen} name="membersSeen" />
                           }
                           label={tm.name}
