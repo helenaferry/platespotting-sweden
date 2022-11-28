@@ -62,7 +62,6 @@ const Settings: NextPage = () => {
     }
 
     const onChangeEditingTeamMember = (event: any) => {
-        console.log(event.target.value);
         let tm = teamMembers.find(tm => tm.id == event.target.value);
         if (!tm) return;
         setUpdatedTeamMemberColor(tm.color);

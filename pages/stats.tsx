@@ -21,7 +21,6 @@ const Stats: NextPage = () => {
     }
     const shortestPeriodBetween = () => {
         const result = (daysSince && daysSince.length > 0) ? daysSince.filter(d => d.daysSince >= 0).reduce((a, b) => a.daysSince < b.daysSince ? a : b) : null;
-        console.log(result);
         return (result) ? result.daysSince : 'N/A';
     }
 
