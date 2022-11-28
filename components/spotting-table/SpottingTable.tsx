@@ -77,7 +77,7 @@ const SpottingTable = () => {
   }
 
   const saveChanges = async (event: any) => {
-    let spotting = spottings.find(spotting => spotting.plateNumber == event.target.value);
+    let spotting = spottings.find(spotting => spotting.id == event.target.value);
     await dispatch(updateSpotting({
       id: event.target.value,
       profile: (session) ? session?.user.id : '',

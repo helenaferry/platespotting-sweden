@@ -78,7 +78,8 @@ const AddForm: React.FunctionComponent = () => {
                 membersSeen: membersSeen,
                 database: supabase
             }))
-            router.push('/list')
+            // router.push('/list')
+            router.reload()
             setAddSpottingStatus('idle')
         }
     }

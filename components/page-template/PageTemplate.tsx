@@ -42,35 +42,15 @@ export default function PageTemplate(props: Props) {
         dispatch(fetchSettings({ id: session?.user.id, database: supabase }))
     }, [session])
 
-    supabase
-        .channel('*')
-        .on('postgres_changes', { event: '*', schema: '*' }, payload => {
-            if (payload.table === 'spottingTeamMembers') {
-                router.reload() // ugly...
-            }
-        })
-        .subscribe()
-
     /* supabase
          .channel('*')
          .on('postgres_changes', { event: '*', schema: '*' }, payload => {
              console.log('postgrs_changes ' + payload.eventType + ' ' + payload.table, payload.new);
              if (payload.table === 'spottings' && payload.eventType === 'INSERT') {
-                 dispatch(addSpotting(payload.new))
+                 
              }
          })
          .subscribe()*/
-
-    /* supabase
-     .channel('*')
-     .on('postgres_changes', { event: '*', schema: '*' }, payload => {
-         console.log('postgrs_changes ' + payload.eventType + ' ' + payload.table, payload.new);
-         if (payload.table === 'spottingTeamMembers' && payload.eventType === 'INSERT') {
-             console.log('team member added', payload.new);
-             console.log(dispatch(findTeamMember(payload.new.id)))
-         }
-     })
-     .subscribe()*/
 
     async function signOut() {
         const { error } = await supabase.auth.signOut()

@@ -3,7 +3,6 @@ import type { RootState } from './store'
 import { SpottingType } from '../types/SpottingType'
 import { TeamMemberType } from '../types/TeamMemberType'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
-import finalPropsSelectorFactory from 'react-redux/es/connect/selectorFactory'
 
 interface SpottingsState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed',
@@ -105,9 +104,6 @@ export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
         }
 
         if (prop.membersSeenUpdated) {
-            console.log(
-                'update members seen plz'
-            )
             const { data: deleteMappingsData, error: deleteMappingsError } = await prop.database
                 .from('spottingTeamMembers')
                 .delete()
@@ -131,10 +127,6 @@ export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
                     return;
                 }
             })
-        } else {
-            console.log('no update members seen yo')
-            let spotting = state.spottings.spottings.find(spotting => spotting.id == prop.id);
-            updatedData[0].spottingTeamMembers = spotting.spottingTeamMembers;
         }
         return updatedData;
     })
@@ -183,14 +175,15 @@ export const spottingsSlice = createSlice({
                 state.status = 'loading'
             })
             .addCase(updateSpotting.fulfilled, (state, action: PayloadAction<any>) => {
-                console.log('updateSpotting succeeded', action.payload[0]);
+                console.log('updateSpotting succeeded', action.payload);
                 state.status = 'succeeded'
-                if (!action.payload) return
-                const newSpotting = action.payload[0];
-                console.log(newSpotting);
-                const index = state.spottings.findIndex(spotting => spotting.plateNumber === newSpotting.plateNumber);
+                /*if (!action.payload) return
+                const updatedSpotting = action.payload[0];
+                if (!updatedSpotting) return;
+                const index = state.spottings.findIndex(spotting => spotting.plateNumber === updatedSpotting.plateNumber);
                 if (index < 0) return;
-                state.spottings[index] = newSpotting;
+                state.spottings[index] = updatedSpotting;*/
+                location.reload(); // for now...
             })
             .addCase(updateSpotting.rejected, (state, action) => {
                 console.log('updateSpotting failed', action.error.message);
