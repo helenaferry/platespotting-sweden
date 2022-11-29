@@ -79,8 +79,9 @@ const AddForm: React.FunctionComponent = () => {
                 database: supabase
             }))
             // router.push('/list')
-            router.reload()
+            // router.reload()
             setAddSpottingStatus('idle')
+            setNote('')
         }
     }
 
@@ -113,7 +114,8 @@ const AddForm: React.FunctionComponent = () => {
                 <p>Lägg till observation för:</p>
                 <Plate plateNumber={nextPlate} large={true} />
             </div>
-            <TextField type="date" id="date" defaultValue={todayString} onChange={onChangeDate} label="Datum" variant="outlined" />
+            TODO: type="date" again
+            <TextField type="text" id="date" defaultValue={todayString} onChange={onChangeDate} label="Datum" variant="outlined" />
             <div>
                 <p>Var såg du nummerplåten?<br /><small>Välj position på kartan. Sök fram rätt plats om kartan visar fel. Du kan flytta markören för att finjustera.</small></p>
                 <LocationSelectorMap updateLocation={updateLocationHandler} /></div>

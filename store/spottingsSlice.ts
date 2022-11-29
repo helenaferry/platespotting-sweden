@@ -177,13 +177,13 @@ export const spottingsSlice = createSlice({
             .addCase(updateSpotting.fulfilled, (state, action: PayloadAction<any>) => {
                 console.log('updateSpotting succeeded', action.payload);
                 state.status = 'succeeded'
-                /*if (!action.payload) return
+                if (!action.payload) return
                 const updatedSpotting = action.payload[0];
                 if (!updatedSpotting) return;
                 const index = state.spottings.findIndex(spotting => spotting.plateNumber === updatedSpotting.plateNumber);
                 if (index < 0) return;
-                state.spottings[index] = updatedSpotting;*/
-                location.reload(); // for now...
+                state.spottings[index] = updatedSpotting;
+                // location.reload(); // for now...
             })
             .addCase(updateSpotting.rejected, (state, action) => {
                 console.log('updateSpotting failed', action.error.message);

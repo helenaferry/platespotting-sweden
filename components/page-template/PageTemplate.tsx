@@ -31,6 +31,7 @@ export default function PageTemplate(props: Props) {
     const router = useRouter()
 
     if (status === 'idle') {
+        console.log('status idle, fetchSpottings')
         dispatch(fetchSpottings())
     }
 
