@@ -8,7 +8,7 @@
   }
 
   .link {
-    @apply text-slate-500 hover:underline hover:text-slate-900
+    @apply text-slate-500 hover:underline hover:text-slate-900;
   }
 }
 

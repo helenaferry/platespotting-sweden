@@ -1,5 +1,0 @@
-SELECT "plateNumber", location_lat, location_lng, "dateSpotted", note, string_agg("teamMembers".name, ', ') AS membersSeen
- FROM spottings left outer JOIN "spottingTeamMembers" ON spottings.id = spotting
- left outer join "teamMembers" on "teamMembers".id = "spottingTeamMembers"."teamMember"
- group by "plateNumber", location_lat, location_lng, "dateSpotted", note
- order by "plateNumber" desc
