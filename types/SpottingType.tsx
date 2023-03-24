@@ -8,9 +8,5 @@ export type SpottingType = {
   dateSpotted: string;
   note: string;
   profile: string | undefined;
-  spottingTeamMembers: SpottingTeamMembersType[] | undefined;
-};
-
-type SpottingTeamMembersType = {
-  teamMembers: TeamMemberType;
+  teamMembers: TeamMemberType[] | undefined;
 };

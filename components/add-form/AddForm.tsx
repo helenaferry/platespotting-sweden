@@ -89,7 +89,7 @@ const AddForm: React.FunctionComponent = () => {
             profile: session?.user.id,
             location_lat: location_lat,
             location_lng: location_lng,
-            spottingTeamMembers: undefined,
+            teamMembers: undefined,
             id: undefined,
           },
           membersSeen: membersSeen,

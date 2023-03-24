@@ -26,22 +26,21 @@ export const fetchSpottings = createAsyncThunk('spottings/fetchSpottings', async
     let { data: spottings, error } = await useSupabaseClient()
         .from('spottings')
         .select(`
-        id,
-        plateNumber,
-        location_lat,
-        location_lng,
-        dateSpotted,
-        note,
-        spottingTeamMembers!fk_spotting_teammember (
-            teamMembers!fk_spotting_teammember2(
-                name,
-                color,
-                id
-            )
-        )
-      `)
+            id,
+            plateNumber,
+            location_lat,
+            location_lng,
+            dateSpotted,
+            note,
+            teamMembers(
+                    name,
+                    color,
+                    id
+                )
+        `)
         .order('plateNumber', { ascending: false })
     if (error) { console.log(error); }
+    console.log(spottings);
     return spottings;
 })
 
@@ -90,18 +89,9 @@ type UpdateSpottingType = {
 }
 
 export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
-    async (prop: UpdateSpottingType, { getState }) => {
-        const state: SpottingsState = getState() as SpottingsState;
+    async (prop: UpdateSpottingType) => {
+
         if (!prop.id) return;
-        const { data: updatedData, error: updateError } = await prop.database
-            .from('spottings')
-            .update({ dateSpotted: prop.dateSpotted, note: prop.note })
-            .eq('id', prop.id)
-            .select()
-        if (updateError) {
-            console.log(updateError);
-            return;
-        }
 
         if (prop.membersSeenUpdated) {
             const { data: deleteMappingsData, error: deleteMappingsError } = await prop.database
@@ -112,23 +102,44 @@ export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
                 console.log(deleteMappingsError);
                 return;
             }
-
-            if (!prop.membersSeen || prop.membersSeen.length < 1) {
-                return updatedData;
+            if (prop.membersSeen && prop.membersSeen.length > 0) {
+                prop.membersSeen.map(async member => {
+                    if (!member) return;
+                    const { data, error: tmError } = await prop.database
+                        .from('spottingTeamMembers')
+                        .insert({ teamMember: member.id, spotting: prop.id, profile: prop.profile })
+                    if (tmError) {
+                        console.log(tmError);
+                        return;
+                    }
+                })
             }
-            prop.membersSeen.map(async member => {
-                if (!member) return;
-                const { data, error: tmError } = await prop.database
-                    .from('spottingTeamMembers')
-                    .insert({ teamMember: member.id, spotting: prop.id, profile: prop.profile })
-                    .select()
-                if (tmError) {
-                    console.log(tmError);
-                    return;
-                }
-            })
         }
+
+        const { data: updatedData, error: updateError } = await prop.database
+            .from('spottings')
+            .update({ dateSpotted: prop.dateSpotted, note: prop.note })
+            .eq('id', prop.id)
+            .select(`
+                id,
+                plateNumber,
+                location_lat,
+                location_lng,
+                dateSpotted,
+                note,
+                teamMembers(
+                        name,
+                        color,
+                        id
+                    )
+            `)
+        if (updateError) {
+            console.log(updateError);
+            return;
+        }
+        console.log(updatedData);
         return updatedData;
+
     })
 
 export const spottingsSlice = createSlice({
