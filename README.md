@@ -3,8 +3,11 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 ## Prerequisites: Setting up local env
 
 You need to create a file in the root directory called .env.local with the following content (replace values):
+
+```bash
 NEXT_PUBLIC_SUPABASE_URL=[get from supabase]
 NEXT_PUBLIC_SUPABASE_ANON_KEY=[get from supabase]
+```
 
 ## Getting Started
 
