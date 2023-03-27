@@ -12,6 +12,9 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 
 export default function MarkerMap() {
     const spottings = useAppSelector(selectAllSpottings)
+    const hasTeamMembers = useAppSelector(
+        (state) => state.settings.hasTeamMembers
+    );
     const markerRef = useRef(null)
     const center = {
         lat: 0,
@@ -83,7 +86,7 @@ export default function MarkerMap() {
                 <div className="text-center">
                     <Plate plateNumber={spotting.plateNumber} large={false} /><br />
                     {spotting.dateSpotted}<br />
-                    <AvatarGroup max={5}>
+                    {hasTeamMembers && <AvatarGroup max={5}>
                         {spotting.teamMembers && spotting.teamMembers.map(tm =>
                             <MemberBadge
                                 key={tm.id}
@@ -92,7 +95,7 @@ export default function MarkerMap() {
                                 color={tm.color}
                                 profile={undefined} />
                         )}
-                    </AvatarGroup>
+                    </AvatarGroup>}
                     {spotting.note && <p className="!m-auto max-w-[100px]">{spotting.note}</p>}
                 </div>
             </Popup>
