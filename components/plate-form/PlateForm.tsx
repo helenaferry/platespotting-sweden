@@ -1,5 +1,5 @@
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Plate from "./../plate/Plate";
 import { LocationType } from "./../../types/LocationType";
@@ -58,6 +58,10 @@ export default function PlateForm(props: PlateFormProps) {
     );
   }
 
+  useEffect(() => {
+    if (editSpotting) setDate(editSpotting.dateSpotted);
+  }, [editSpotting]);
+
   const onChangeNote = (event: any) => {
     setNote(event.target.value);
   };
@@ -80,7 +84,6 @@ export default function PlateForm(props: PlateFormProps) {
 
   const onSubmit = (event: any) => {
     event.preventDefault();
-    console.log("submit", props.mode);
     const spotting = {
       spotting: {
         plateNumber: nextPlate,
@@ -118,25 +121,7 @@ export default function PlateForm(props: PlateFormProps) {
   async function addSpotting(spotting: NewOrModifiedSpottingType) {
     if (canSave) {
       setAddSpottingStatus("pending");
-      await dispatch(
-        addNewSpotting(
-          spotting
-          /*{
-          spotting: {
-            plateNumber: nextPlate,
-            dateSpotted: date,
-            note: note,
-            profile: session?.user.id,
-            location_lat: location_lat,
-            location_lng: location_lng,
-            teamMembers: undefined,
-            id: undefined,
-          },
-          membersSeen: membersSeen,
-          database: supabase,
-        }*/
-        )
-      );
+      await dispatch(addNewSpotting(spotting));
       setAddSpottingStatus("idle");
       setNote("");
       router.push("/list");
