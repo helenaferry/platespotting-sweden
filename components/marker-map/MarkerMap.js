@@ -1,6 +1,6 @@
 
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
-import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import 'leaflet/dist/leaflet.css'
 import 'node_modules/leaflet-geosearch/dist/geosearch.css'
 import { useAppSelector } from './../../hooks'
