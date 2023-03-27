@@ -91,9 +91,9 @@ export default function MarkerMap() {
                                 name={tm.name}
                                 color={tm.color}
                                 profile={undefined} />
-
                         )}
                     </AvatarGroup>
+                    {spotting.note && <p class="!m-auto max-w-[100px]">{spotting.note}</p>}
                 </div>
             </Popup>
         </Marker>)}
