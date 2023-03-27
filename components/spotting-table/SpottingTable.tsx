@@ -288,7 +288,7 @@ const SpottingTable = () => {
                     </span>
                   ) : (
                     <div>
-                      <IconButton href="/add">
+                      <IconButton href={"/edit/" + spotting.plateNumber}>
                         <EditIcon className="pointer-events-none" />
                       </IconButton>
                       <IconButton
