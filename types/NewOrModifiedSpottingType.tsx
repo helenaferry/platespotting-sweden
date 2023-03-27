@@ -3,7 +3,7 @@ import { TeamMemberType } from "./TeamMemberType";
 
 export type NewOrModifiedSpottingType = {
   spotting: SpottingType;
-  membersSeen: (TeamMemberType | undefined)[];
+  membersSeen: (TeamMemberType | undefined)[] | undefined;
   membersSeenUpdated: boolean;
   database: any;
 };

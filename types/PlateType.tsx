@@ -1,4 +1,4 @@
 export type PlateType = {
-  plateNumber: number;
+  plateNumber: number | undefined;
   large: boolean;
 };

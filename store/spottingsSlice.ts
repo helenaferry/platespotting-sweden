@@ -183,7 +183,7 @@ export const spottingsSlice = createSlice({
 
 export const selectNextPlate = (state: RootState) => {
     let latest = state.spottings.spottings[0] // state.spottings.spottings && state.spottings.spottings.reduce((x, y) => x.plateNumber > y.plateNumber ? x : y, { plateNumber: 0 })
-    if (latest && latest.plateNumber != 0) {
+    if (latest && latest.plateNumber && latest.plateNumber != 0) {
         return latest.plateNumber + 1
     } else {
         return 1;

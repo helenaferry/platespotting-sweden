@@ -40,8 +40,9 @@ export default function PlateForm(props: PlateFormProps) {
   const [note, setNote] = useState("");
   const [date, setDate] = useState(todayString);
   const [membersSeen, setMembersSeen] = useState<
-    (TeamMemberType | undefined)[]
+    (TeamMemberType | undefined)[] | undefined
   >([]);
+  const [membersSeenUpdated, setMembersSeenUpdated] = useState(false);
   const [location_lat, setLat] = useState(0);
   const [location_lng, setLng] = useState(0);
   const dispatch = useAppDispatch();
@@ -59,7 +60,10 @@ export default function PlateForm(props: PlateFormProps) {
   }
 
   useEffect(() => {
-    if (editSpotting) setDate(editSpotting.dateSpotted);
+    if (editSpotting) {
+      setDate(editSpotting.dateSpotted);
+      setNote(editSpotting.note);
+    }
   }, [editSpotting]);
 
   const onChangeNote = (event: any) => {
@@ -71,6 +75,7 @@ export default function PlateForm(props: PlateFormProps) {
   };
 
   const onChangeMembersSeen = () => {
+    setMembersSeenUpdated(true);
     setMembersSeen(
       Array.from(
         document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
@@ -86,7 +91,8 @@ export default function PlateForm(props: PlateFormProps) {
     event.preventDefault();
     const spotting = {
       spotting: {
-        plateNumber: nextPlate,
+        plateNumber:
+          props.mode === "add" ? nextPlate : editSpotting?.plateNumber,
         dateSpotted: date,
         note: note,
         profile: session?.user.id,
@@ -95,8 +101,12 @@ export default function PlateForm(props: PlateFormProps) {
         teamMembers: undefined,
         id: props.mode === "add" ? undefined : editSpotting?.id,
       },
-      membersSeen: membersSeen,
-      membersSeenUpdated: props.mode === "add" ? false : true, // TODO
+      membersSeen: membersSeenUpdated
+        ? membersSeen
+        : editSpotting
+        ? editSpotting.teamMembers
+        : [],
+      membersSeenUpdated: props.mode === "add" ? false : membersSeenUpdated,
       database: supabase,
     };
     if (props.mode === "add") {
@@ -123,7 +133,6 @@ export default function PlateForm(props: PlateFormProps) {
       setAddSpottingStatus("pending");
       await dispatch(addNewSpotting(spotting));
       setAddSpottingStatus("idle");
-      setNote("");
       router.push("/list");
     }
   }
@@ -133,7 +142,6 @@ export default function PlateForm(props: PlateFormProps) {
     //setAddSpottingStatus("pending");
     await dispatch(updateSpotting(spotting));
     //setAddSpottingStatus("idle");
-    setNote("");
     router.push("/list");
     //}
   }

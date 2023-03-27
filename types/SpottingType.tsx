@@ -2,7 +2,7 @@ import { TeamMemberType } from "./TeamMemberType";
 
 export type SpottingType = {
   id: number | undefined;
-  plateNumber: number;
+  plateNumber: number | undefined;
   location_lat: number;
   location_lng: number;
   dateSpotted: string;
