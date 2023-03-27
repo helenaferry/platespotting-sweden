@@ -287,12 +287,17 @@ const SpottingTable = () => {
                       </IconButton>
                     </span>
                   ) : (
-                    <IconButton
-                      onClick={onChangeEditing}
-                      value={spotting.plateNumber}
-                    >
-                      <EditIcon className="pointer-events-none" />
-                    </IconButton>
+                    <div>
+                      <IconButton href="/add">
+                        <EditIcon className="pointer-events-none" />
+                      </IconButton>
+                      <IconButton
+                        onClick={onChangeEditing}
+                        value={spotting.plateNumber}
+                      >
+                        <EditIcon className="pointer-events-none" />
+                      </IconButton>
+                    </div>
                   )}
                 </TableCell>
               </TableRow>
