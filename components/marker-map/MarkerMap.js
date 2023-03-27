@@ -96,7 +96,7 @@ export default function MarkerMap() {
                                 profile={undefined} />
                         )}
                     </AvatarGroup>}
-                    {spotting.note && <p className="!m-auto max-w-[100px]">{spotting.note}</p>}
+                    {spotting.note && <p className="!m-auto max-w-[100px] break-all">{spotting.note}</p>}
                 </div>
             </Popup>
         </Marker>)}
