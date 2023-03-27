@@ -19,19 +19,26 @@ export default function LocationSelectorMap(props) {
     if (!("geolocation" in navigator) || locationSet) {
       return;
     }
-    // get position
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        setPosition({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude
-        })
-        props.updateLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-        setLocationSet(true)
-      }
-    );
+    if (props.initialPosition) {
+      setLocation(props.initialPosition.lat, props.initialPosition.lng);
+    } else {
+      // get current position from browser
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          setLocation(pos.coords.latitude, pos.coords.longitude);
+        }
+      );
+    }
   })
 
+  function setLocation(lat, lng) {
+    setPosition({
+      lat: lat,
+      lng: lng
+    })
+    props.updateLocation({ lat: lat, lng: lng })
+    setLocationSet(true)
+  }
 
   function DraggableMarker() {
     const [draggable, setDraggable] = useState(false)

@@ -1,12 +1,12 @@
 import type { NextPage } from "next";
 import PageTemplate from "./../components/page-template/PageTemplate";
-import AddForm from "./../components/add-form/AddForm";
+import PlateForm from "./../components/plate-form/PlateForm";
 
 const Add: NextPage = () => {
   return (
     <div>
       <PageTemplate>
-        <AddForm />
+        <PlateForm mode="add" />
       </PageTemplate>
     </div>
   );

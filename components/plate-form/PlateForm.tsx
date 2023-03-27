@@ -4,25 +4,35 @@ import { useRouter } from "next/router";
 import Plate from "./../plate/Plate";
 import { LocationType } from "./../../types/LocationType";
 import { useAppSelector, useAppDispatch } from "./../../hooks";
-import { selectNextPlate, addNewSpotting } from "./../../store/spottingsSlice";
+import {
+  selectNextPlate,
+  addNewSpotting,
+  selectAllSpottings,
+  updateSpotting,
+} from "./../../store/spottingsSlice";
 import { selectAllTeamMembers } from "./../../store/teamMemberSlice";
-
 import dynamic from "next/dynamic";
 import { TeamMemberType } from "../../types/TeamMemberType";
-
 import TextField from "@mui/material/TextField";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
+import { SpottingType } from "../../types/SpottingType";
+import { NewOrModifiedSpottingType } from "../../types/NewOrModifiedSpottingType";
 
 const LocationSelectorMap = dynamic(
   () => import("./../location-selector-map/LocationSelectorMap.js"),
   { ssr: false }
 );
 
-const AddForm: React.FunctionComponent = () => {
+type PlateFormProps = {
+  mode: "edit" | "add";
+  plateNumber?: number;
+};
+
+export default function PlateForm(props: PlateFormProps) {
   const session = useSession();
   const router = useRouter();
   const todayString = getTodayString();
@@ -39,6 +49,14 @@ const AddForm: React.FunctionComponent = () => {
   const status = useAppSelector((state) => state.spottings.status);
   const supabase = useSupabaseClient();
   const [addSpottingStatus, setAddSpottingStatus] = useState("idle");
+  const spottings = useAppSelector(selectAllSpottings);
+  let editSpotting: SpottingType | undefined;
+
+  if (props.mode == "edit" && props.plateNumber && props.plateNumber > 0) {
+    editSpotting = spottings.find(
+      (spotting) => spotting.plateNumber == props.plateNumber
+    );
+  }
 
   const onChangeNote = (event: any) => {
     setNote(event.target.value);
@@ -62,7 +80,27 @@ const AddForm: React.FunctionComponent = () => {
 
   const onSubmit = (event: any) => {
     event.preventDefault();
-    addSpotting();
+    console.log("submit", props.mode);
+    const spotting = {
+      spotting: {
+        plateNumber: nextPlate,
+        dateSpotted: date,
+        note: note,
+        profile: session?.user.id,
+        location_lat: location_lat,
+        location_lng: location_lng,
+        teamMembers: undefined,
+        id: props.mode === "add" ? undefined : editSpotting?.id,
+      },
+      membersSeen: membersSeen,
+      membersSeenUpdated: props.mode === "add" ? false : true, // TODO
+      database: supabase,
+    };
+    if (props.mode === "add") {
+      addSpotting(spotting);
+    } else if (props.mode === "edit") {
+      updateThisSpotting(spotting);
+    }
   };
 
   function getTodayString() {
@@ -77,11 +115,13 @@ const AddForm: React.FunctionComponent = () => {
 
   const canSave = addSpottingStatus === "idle";
 
-  async function addSpotting() {
+  async function addSpotting(spotting: NewOrModifiedSpottingType) {
     if (canSave) {
       setAddSpottingStatus("pending");
       await dispatch(
-        addNewSpotting({
+        addNewSpotting(
+          spotting
+          /*{
           spotting: {
             plateNumber: nextPlate,
             dateSpotted: date,
@@ -94,13 +134,23 @@ const AddForm: React.FunctionComponent = () => {
           },
           membersSeen: membersSeen,
           database: supabase,
-        })
+        }*/
+        )
       );
-      // router.push('/list')
-      // router.reload()
       setAddSpottingStatus("idle");
       setNote("");
+      router.push("/list");
     }
+  }
+
+  async function updateThisSpotting(spotting: NewOrModifiedSpottingType) {
+    //if (canSave) {
+    //setAddSpottingStatus("pending");
+    await dispatch(updateSpotting(spotting));
+    //setAddSpottingStatus("idle");
+    setNote("");
+    router.push("/list");
+    //}
   }
 
   function updateLocationHandler(data: LocationType) {
@@ -122,6 +172,14 @@ const AddForm: React.FunctionComponent = () => {
                     value={teamMember.id}
                     onChange={onChangeMembersSeen}
                     name="membersSeen"
+                    defaultChecked={
+                      props.mode === "edit" &&
+                      editSpotting &&
+                      editSpotting.teamMembers &&
+                      editSpotting.teamMembers.findIndex(
+                        (tm) => tm.id == teamMember.id
+                      ) > -1
+                    }
                   />
                 }
                 label={teamMember.name}
@@ -136,13 +194,25 @@ const AddForm: React.FunctionComponent = () => {
   return status == "succeeded" && addSpottingStatus == "idle" ? (
     <form onSubmit={onSubmit} className="flex flex-col gap-8">
       <div className="text-center">
-        <p>Lägg till observation för:</p>
-        <Plate plateNumber={nextPlate} large={true} />
+        {props.mode == "add" && <p>Lägg till observation för:</p>}
+        {props.mode == "edit" && <p>Redigera observation för:</p>}
+        <Plate
+          plateNumber={
+            props.mode == "add"
+              ? nextPlate
+              : editSpotting
+              ? editSpotting.plateNumber
+              : 0
+          }
+          large={true}
+        />
       </div>
       <TextField
         type="date"
         id="date"
-        defaultValue={todayString}
+        defaultValue={
+          props.mode == "add" ? todayString : editSpotting?.dateSpotted
+        }
         onChange={onChangeDate}
         label="Datum"
         variant="outlined"
@@ -156,7 +226,17 @@ const AddForm: React.FunctionComponent = () => {
             kan flytta markören för att finjustera.
           </small>
         </p>
-        <LocationSelectorMap updateLocation={updateLocationHandler} />
+        <LocationSelectorMap
+          initialPosition={
+            editSpotting
+              ? {
+                  lat: editSpotting.location_lat,
+                  lng: editSpotting.location_lng,
+                }
+              : null
+          }
+          updateLocation={updateLocationHandler}
+        />
       </div>
       <div className="flex gap-8">
         <TextField
@@ -182,11 +262,11 @@ const AddForm: React.FunctionComponent = () => {
         variant="outlined"
         multiline
         minRows={3}
+        defaultValue={props.mode == "edit" ? editSpotting?.note : ""}
       />
-
       {teamMembers.length > 0 && teamMembersSection()}
       <button type="submit" className="btn-primary" disabled={!canSave}>
-        Spara
+        {props.mode == "add" ? "Lägg till" : "Spara ändringar"}
       </button>
     </form>
   ) : status == "failed" ? (
@@ -194,5 +274,4 @@ const AddForm: React.FunctionComponent = () => {
   ) : (
     <p>Laddar...</p>
   );
-};
-export default AddForm;
+}
