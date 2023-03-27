@@ -40,7 +40,6 @@ export const fetchSpottings = createAsyncThunk('spottings/fetchSpottings', async
         `)
         .order('plateNumber', { ascending: false })
     if (error) { console.log(error); }
-    console.log(spottings);
     return spottings;
 })
 
@@ -74,7 +73,10 @@ export const addNewSpotting = createAsyncThunk("spottings/addNewSpotting",
                 console.log(tmError);
                 return;
             }
-        })
+        });
+        if (spottingData[0] && prop.membersSeen && prop.membersSeen.length > 0) {
+            spottingData[0].teamMembers = prop.membersSeen;
+        }
         return spottingData;
     })
 
@@ -93,8 +95,18 @@ export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
 
         if (!prop.id) return;
 
+        const { data: updatedData, error: updateError } = await prop.database
+            .from('spottings')
+            .update({ dateSpotted: prop.dateSpotted, note: prop.note })
+            .eq('id', prop.id)
+            .select()
+        if (updateError) {
+            console.log(updateError);
+            return;
+        }
+
         if (prop.membersSeenUpdated) {
-            const { data: deleteMappingsData, error: deleteMappingsError } = await prop.database
+            const { data, error: deleteMappingsError } = await prop.database
                 .from('spottingTeamMembers')
                 .delete()
                 .eq('spotting', prop.id)
@@ -115,29 +127,9 @@ export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
                 })
             }
         }
-
-        const { data: updatedData, error: updateError } = await prop.database
-            .from('spottings')
-            .update({ dateSpotted: prop.dateSpotted, note: prop.note })
-            .eq('id', prop.id)
-            .select(`
-                id,
-                plateNumber,
-                location_lat,
-                location_lng,
-                dateSpotted,
-                note,
-                teamMembers(
-                        name,
-                        color,
-                        id
-                    )
-            `)
-        if (updateError) {
-            console.log(updateError);
-            return;
+        if (updatedData[0] && prop.membersSeen && prop.membersSeen.length > 0) {
+            updatedData[0].teamMembers = prop.membersSeen;
         }
-        console.log(updatedData);
         return updatedData;
 
     })
@@ -176,17 +168,16 @@ export const spottingsSlice = createSlice({
 
             })
             .addCase(addNewSpotting.rejected, (state, action) => {
-                // console.log('addNewSpotting failed', action.error.message);
+                console.log('addNewSpotting failed', action.error.message);
                 state.status = 'failed'
                 state.error = action.error.message || '';
             })
             // Update spotting
             .addCase(updateSpotting.pending, (state, action) => {
-                console.log('updateSpotting loading');
                 state.status = 'loading'
             })
             .addCase(updateSpotting.fulfilled, (state, action: PayloadAction<any>) => {
-                console.log('updateSpotting succeeded', action.payload);
+                // console.log('updateSpotting succeeded', action.payload);
                 state.status = 'succeeded'
                 if (!action.payload) return
                 const updatedSpotting = action.payload[0];
@@ -194,7 +185,6 @@ export const spottingsSlice = createSlice({
                 const index = state.spottings.findIndex(spotting => spotting.plateNumber === updatedSpotting.plateNumber);
                 if (index < 0) return;
                 state.spottings[index] = updatedSpotting;
-                // location.reload(); // for now...
             })
             .addCase(updateSpotting.rejected, (state, action) => {
                 console.log('updateSpotting failed', action.error.message);
