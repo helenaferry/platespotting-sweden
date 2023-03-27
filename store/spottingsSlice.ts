@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from './store'
 import { SpottingType } from '../types/SpottingType'
 import { TeamMemberType } from '../types/TeamMemberType'
+import { NewOrModifiedSpottingType } from "../types/NewOrModifiedSpottingType";
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 
 interface SpottingsState {
@@ -43,14 +44,8 @@ export const fetchSpottings = createAsyncThunk('spottings/fetchSpottings', async
     return spottings;
 })
 
-type AddNewSpottingType = {
-    spotting: SpottingType,
-    membersSeen: (TeamMemberType | undefined)[],
-    database: any
-}
-
 export const addNewSpotting = createAsyncThunk("spottings/addNewSpotting",
-    async (prop: AddNewSpottingType) => {
+    async (prop: NewOrModifiedSpottingType) => {
         const { data: spottingData, error: spottingError } = await prop.database
             .from('spottings')
             .insert(
@@ -80,25 +75,15 @@ export const addNewSpotting = createAsyncThunk("spottings/addNewSpotting",
         return spottingData;
     })
 
-type UpdateSpottingType = {
-    id: number,
-    profile: string,
-    dateSpotted: string,
-    note: string,
-    membersSeenUpdated: boolean;
-    membersSeen: (TeamMemberType | undefined)[],
-    database: any
-}
-
 export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
-    async (prop: UpdateSpottingType) => {
+    async (prop: NewOrModifiedSpottingType) => {
 
-        if (!prop.id) return;
+        if (!prop.spotting.id) return;
 
         const { data: updatedData, error: updateError } = await prop.database
             .from('spottings')
-            .update({ dateSpotted: prop.dateSpotted, note: prop.note })
-            .eq('id', prop.id)
+            .update({ dateSpotted: prop.spotting.dateSpotted, note: prop.spotting.note, location_lat: prop.spotting.location_lat, location_lng: prop.spotting.location_lng })
+            .eq('id', prop.spotting.id)
             .select()
         if (updateError) {
             console.log(updateError);
@@ -109,7 +94,7 @@ export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
             const { data, error: deleteMappingsError } = await prop.database
                 .from('spottingTeamMembers')
                 .delete()
-                .eq('spotting', prop.id)
+                .eq('spotting', prop.spotting.id)
             if (deleteMappingsError) {
                 console.log(deleteMappingsError);
                 return;
@@ -119,7 +104,7 @@ export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
                     if (!member) return;
                     const { data, error: tmError } = await prop.database
                         .from('spottingTeamMembers')
-                        .insert({ teamMember: member.id, spotting: prop.id, profile: prop.profile })
+                        .insert({ teamMember: member.id, spotting: prop.spotting.id, profile: prop.spotting.profile })
                     if (tmError) {
                         console.log(tmError);
                         return;
