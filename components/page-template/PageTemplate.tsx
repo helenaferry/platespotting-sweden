@@ -1,49 +1,48 @@
-import React, { ReactNode, useEffect } from 'react'
-import { Auth, ThemeSupa } from '@supabase/auth-ui-react'
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
-import { useAppSelector, useAppDispatch } from './../../hooks'
-import { fetchSpottings } from './../../store/spottingsSlice'
-import { fetchTeamMembers } from './../../store/teamMemberSlice'
-import { fetchSettings } from './../../store/settingsSlice';
-import { useRouter } from 'next/router'
-import Head from 'next/head'
-import Link from 'next/link'
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
-import Box from '@mui/material/Box';
-import SettingsIcon from '@mui/icons-material/Settings';
-import HomeIcon from '@mui/icons-material/Home';
+import React, { ReactNode, useEffect } from "react";
+import { Auth, ThemeSupa } from "@supabase/auth-ui-react";
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useAppSelector, useAppDispatch } from "./../../hooks";
+import { fetchSpottings } from "./../../store/spottingsSlice";
+import { fetchTeamMembers } from "./../../store/teamMemberSlice";
+import { fetchSettings } from "./../../store/settingsSlice";
+import { useRouter } from "next/router";
+import Head from "next/head";
+import Link from "next/link";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import Box from "@mui/material/Box";
+import SettingsIcon from "@mui/icons-material/Settings";
+import HomeIcon from "@mui/icons-material/Home";
 
 type Props = {
-    children: ReactNode
-}
+  children: ReactNode;
+};
 
 export default function PageTemplate(props: Props) {
-    const session = useSession()
-    const supabase = useSupabaseClient()
-    const error = useAppSelector(state => state.spottings.error)
-    const status = useAppSelector(state => state.spottings.status)
-    const teamMemberStatus = useAppSelector(state => state.teamMembers.status)
-    //  const settingsStatus = useAppSelector(state => state.settings.status)
-    const name = useAppSelector(state => state.settings.name)
-    const dispatch = useAppDispatch()
-    const router = useRouter()
+  const session = useSession();
+  const supabase = useSupabaseClient();
+  const error = useAppSelector((state) => state.spottings.error);
+  const status = useAppSelector((state) => state.spottings.status);
+  const teamMemberStatus = useAppSelector((state) => state.teamMembers.status);
+  //  const settingsStatus = useAppSelector(state => state.settings.status)
+  const name = useAppSelector((state) => state.settings.name);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
 
-    if (status === 'idle') {
-        console.log('status idle, fetchSpottings')
-        dispatch(fetchSpottings())
-    }
+  if (!status || status === "idle") {
+    dispatch(fetchSpottings());
+  }
 
-    if (teamMemberStatus === 'idle') {
-        dispatch(fetchTeamMembers())
-    }
+  if (teamMemberStatus === "idle") {
+    dispatch(fetchTeamMembers());
+  }
 
-    useEffect(() => {
-        dispatch(fetchSettings({ id: session?.user.id, database: supabase }))
-    }, [session])
+  useEffect(() => {
+    dispatch(fetchSettings({ id: session?.user.id, database: supabase }));
+  }, [session]);
 
-    /* supabase
+  /* supabase
          .channel('*')
          .on('postgres_changes', { event: '*', schema: '*' }, payload => {
              console.log('postgrs_changes ' + payload.eventType + ' ' + payload.table, payload.new);
@@ -53,72 +52,93 @@ export default function PageTemplate(props: Props) {
          })
          .subscribe()*/
 
-    async function signOut() {
-        const { error } = await supabase.auth.signOut()
-        router.reload()
-    }
+  async function signOut() {
+    const { error } = await supabase.auth.signOut();
+    router.reload();
+  }
 
-    return <div className="w-screen min-h-full bg-slate-100"><div className="p-2 mx-auto min-h-screen bg-white" style={{ maxWidth: "1024px" }}>
+  return (
+    <div className="w-screen min-h-full bg-slate-100">
+      <div
+        className="p-2 mx-auto min-h-screen bg-white"
+        style={{ maxWidth: "1024px" }}
+      >
         <Head>
-            <title>Platespotting Sweden</title>
-            <meta name="description" content="Platespotting Sweden" />
-            <link rel="icon" href="/favicon.ico" />
+          <title>Platespotting Sweden</title>
+          <meta name="description" content="Platespotting Sweden" />
+          <link rel="icon" href="/favicon.ico" />
         </Head>
         <header className="relative text-center">
-            {session &&
-                <div className="absolute left-0 text-left">
-                    <ButtonGroup variant="text" aria-label="text button group">
-                        <Button><Link href="/"><HomeIcon /></Link></Button>
-                    </ButtonGroup>
-                </div>
-            }
-            {session &&
-                <div className="absolute right-0 text-right ml-10">
-
-                    <ButtonGroup variant="text" aria-label="text button group">
-                        <Button onClick={signOut}>Logga ut {name ? name : session?.user.email}
-                        </Button>
-                        <Button><Link href="/settings"><SettingsIcon /></Link></Button>
-                    </ButtonGroup>
-                </div>
-            }
-            <Typography variant="h1" gutterBottom>
-                <Link href="/">Platespotting Sweden</Link>
-            </Typography>
-            {error && <p>Fel: {error}</p>}
-            {session &&
-                <Box
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        marginBottom: 2,
-                        '& > *': {
-                            m: 1,
-                        },
-                    }}
-                >
-                    <ButtonGroup variant="text" aria-label="text button group">
-                        <Button><Link href="/list">Lista alla</Link></Button>
-                        <Button><Link href="/map">Karta</Link></Button>
-                        <Button><Link href="/stats">Statistik</Link></Button>
-                        <Button><Link href="/add">Lägg till</Link></Button>
-                    </ButtonGroup>
-                </Box>
-            }
+          {session && (
+            <div className="absolute left-0 text-left">
+              <ButtonGroup variant="text" aria-label="text button group">
+                <Button>
+                  <Link href="/">
+                    <HomeIcon />
+                  </Link>
+                </Button>
+              </ButtonGroup>
+            </div>
+          )}
+          {session && (
+            <div className="absolute right-0 text-right ml-10">
+              <ButtonGroup variant="text" aria-label="text button group">
+                <Button onClick={signOut}>
+                  Logga ut {name ? name : session?.user.email}
+                </Button>
+                <Button>
+                  <Link href="/settings">
+                    <SettingsIcon />
+                  </Link>
+                </Button>
+              </ButtonGroup>
+            </div>
+          )}
+          <Typography variant="h1" gutterBottom>
+            <Link href="/">Platespotting Sweden</Link>
+          </Typography>
+          {error && <p>Fel: {error}</p>}
+          {session && (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                marginBottom: 2,
+                "& > *": {
+                  m: 1,
+                },
+              }}
+            >
+              <ButtonGroup variant="text" aria-label="text button group">
+                <Button>
+                  <Link href="/list">Lista alla</Link>
+                </Button>
+                <Button>
+                  <Link href="/map">Karta</Link>
+                </Button>
+                <Button>
+                  <Link href="/stats">Statistik</Link>
+                </Button>
+                <Button>
+                  <Link href="/add">Lägg till</Link>
+                </Button>
+              </ButtonGroup>
+            </Box>
+          )}
         </header>
         <main className="flex justify-center">
-            {!session ? (
-                <Auth
-                    supabaseClient={supabase}
-                    appearance={{ theme: ThemeSupa }}
-                    theme="light"
-                />
-            ) : (
-                <div className="w-full mb-10">
-                    {props.children}
-                </div>
-            )}
+          {!session ? (
+            <Auth
+              supabaseClient={supabase}
+              appearance={{ theme: ThemeSupa }}
+              theme="light"
+            />
+          ) : (
+            <div className="w-full mb-10">{props.children}</div>
+          )}
         </main>
-    </div></div>
+      </div>
+    </div>
+  );
 }
