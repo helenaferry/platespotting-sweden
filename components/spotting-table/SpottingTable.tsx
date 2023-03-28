@@ -1,23 +1,58 @@
 import { useAppSelector } from "./../../hooks";
+import { useState } from "react";
 import { selectAllSpottings } from "./../../store/spottingsSlice";
+import classNames from "classnames";
 import Plate from "./../plate/Plate";
 import MemberBadge from "./../member-badge/MemberBadge";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
-
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import Button from "@mui/material/Button";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 const SpottingTable = () => {
   const spottings = useAppSelector(selectAllSpottings);
   const hasTeamMembers = useAppSelector(
     (state) => state.settings.hasTeamMembers
   );
+  const [expanded, setExpanded] = useState(() => new Set());
+
+  const handleChange =
+    (accordion: string) =>
+    (event: React.SyntheticEvent, isExpanded: boolean) => {
+      if (isExpanded) {
+        addToExpanded(accordion);
+      } else {
+        removeFromExpanded(accordion);
+      }
+    };
+
+  function addToExpanded(accordion: string) {
+    setExpanded((prev) => new Set(prev).add(accordion));
+  }
+
+  function removeFromExpanded(accordion: string) {
+    setExpanded((prev) => {
+      const newExpanded = new Set(prev);
+      newExpanded.delete(accordion);
+      return newExpanded;
+    });
+  }
+
+  function expandAll() {
+    let newExpanded = new Set();
+    spottings.map((spotting) =>
+      newExpanded.add("accordion" + spotting.plateNumber)
+    );
+    setExpanded(newExpanded);
+  }
+
+  function collapseAll() {
+    setExpanded(new Set());
+  }
 
   function dayDiff(date1: string, date2: string) {
     let d1: Date = new Date(date1);
@@ -26,46 +61,76 @@ const SpottingTable = () => {
     let daysBetweenDates: number = Math.ceil(
       timeInMillisec / (1000 * 60 * 60 * 24)
     );
-    return daysBetweenDates;
+    let dayOrDays = daysBetweenDates === 1 ? " dag" : " dagar";
+    return daysBetweenDates + dayOrDays;
   }
 
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table" padding="none">
-        <TableHead>
-          <TableRow>
-            <TableCell>Nummerplåt</TableCell>
-            <TableCell>Datum</TableCell>
-            <TableCell>Dagar</TableCell>
-            {hasTeamMembers && (
-              <TableCell align="center">Teammedlemmar</TableCell>
-            )}
-            <TableCell>Anteckning</TableCell>
-            <TableCell></TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {spottings.map((spotting, index) => {
-            return (
-              <TableRow
-                key={index}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+    <div>
+      <p className="text-right">
+        <Button
+          onClick={collapseAll}
+          className="normal-case font-normal text-xs"
+          disabled={expanded.size === 0}
+        >
+          <ExpandLessIcon /> Fäll ihop alla
+        </Button>
+        <Button
+          onClick={expandAll}
+          className="normal-case font-normal text-xs"
+          disabled={expanded.size === spottings.length}
+        >
+          Expandera alla
+          <ExpandMoreIcon />
+        </Button>
+      </p>
+      {spottings.map((spotting, index) => {
+        return (
+          <Accordion
+            key={spotting.plateNumber}
+            expanded={expanded.has("accordion" + spotting.plateNumber)}
+            onChange={handleChange("accordion" + spotting.plateNumber)}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls={`accordion-${spotting.plateNumber}-content`}
+              id={`accordion-${spotting.plateNumber}-header`}
+            >
+              <div
+                className={classNames(
+                  "w-full",
+                  "grid",
+                  "items-center",
+                  "grid-cols-3",
+                  "md:grid-cols-4",
+                  "md:grid-rows-1",
+                  "gap-1",
+                  {
+                    "grid-rows-2": hasTeamMembers,
+                    "grid-rows-1": !hasTeamMembers,
+                  }
+                )}
               >
-                <TableCell>
+                <div
+                  className={classNames("m:row-span-1", {
+                    "row-span-2": hasTeamMembers,
+                    "row-span-1": !hasTeamMembers,
+                  })}
+                >
                   <Plate plateNumber={spotting.plateNumber} large={false} />
-                </TableCell>
-                <TableCell>{spotting.dateSpotted}</TableCell>
-                <TableCell>
+                </div>
+                <div>{spotting.dateSpotted} </div>
+                <div>
                   {index >= 0 &&
                     index < spottings.length - 1 &&
                     dayDiff(
                       spotting.dateSpotted,
                       spottings[index + 1].dateSpotted
                     )}
-                </TableCell>
-                {hasTeamMembers && (
-                  <TableCell>
-                    <AvatarGroup max={5}>
+                </div>
+                <div>
+                  {hasTeamMembers && (
+                    <AvatarGroup max={5} className="!justify-end">
                       {spotting.teamMembers &&
                         spotting.teamMembers
                           // .sort((a, b) => a.id - b.id)
@@ -79,20 +144,23 @@ const SpottingTable = () => {
                             />
                           ))}
                     </AvatarGroup>
-                  </TableCell>
-                )}
-                <TableCell className={"w-48"}>{spotting.note}</TableCell>
-                <TableCell align="right" className="pr-2">
-                  <IconButton href={"/edit/" + spotting.plateNumber}>
-                    <EditIcon className="pointer-events-none" />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+                  )}
+                </div>
+              </div>
+            </AccordionSummary>
+            <AccordionDetails>
+              <div>[karta]</div>
+              <div className="break-all">Anteckning: {spotting.note}</div>
+              <div>
+                <IconButton href={"/edit/" + spotting.plateNumber}>
+                  <EditIcon className="pointer-events-none" />
+                </IconButton>
+              </div>
+            </AccordionDetails>
+          </Accordion>
+        );
+      })}
+    </div>
   );
 };
 
