@@ -1,9 +1,9 @@
-import { useAppSelector } from "./../../hooks";
+import { useAppSelector } from "../../hooks";
 import { useState } from "react";
-import { selectAllSpottings } from "./../../store/spottingsSlice";
+import { selectAllSpottings } from "../../store/spottingsSlice";
 import classNames from "classnames";
-import Plate from "./../plate/Plate";
-import MemberBadge from "./../member-badge/MemberBadge";
+import Plate from "../plate/Plate";
+import MemberBadge from "../member-badge/MemberBadge";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
@@ -13,7 +13,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import Button from "@mui/material/Button";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-const SpottingTable = () => {
+const AllSpottings = () => {
   const spottings = useAppSelector(selectAllSpottings);
   const hasTeamMembers = useAppSelector(
     (state) => state.settings.hasTeamMembers
@@ -164,4 +164,4 @@ const SpottingTable = () => {
   );
 };
 
-export default SpottingTable;
+export default AllSpottings;

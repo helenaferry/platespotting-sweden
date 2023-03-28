@@ -1,11 +1,11 @@
 import type { NextPage } from "next";
 import PageTemplate from "./../components/page-template/PageTemplate";
-import SpottingTable from "../components/spotting-table/SpottingTable";
+import AllSpottings from "../components/all-spottings/AllSpottings";
 
 const List: NextPage = () => {
   return (
     <PageTemplate>
-      <SpottingTable></SpottingTable>
+      <AllSpottings></AllSpottings>
     </PageTemplate>
   );
 };
