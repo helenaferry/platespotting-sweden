@@ -40,15 +40,23 @@ const Stats: NextPage = () => {
   const dispatch = useAppDispatch();
   const supabase = useSupabaseClient();
   const teamMembers = useAppSelector(selectAllTeamMembers);
-  const COLORS =
+  const COLORS = [
+    "#D16666",
+    "#4B244A",
+    "#2A7F62",
+    "#FFBF46",
+    "#69899B",
+    "#000000",
+  ];
+  /*
     !hasTeamMembers || !teamMembers || teamMembers.length == 0
-      ? ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]
-      : teamMembers.map((tm) => tm.color);
+      ? ["#D16666", "#4B244A", "#2A7F62", "#FFBF46", "#69899B"]
+      : teamMembers.map((tm) => tm.color);*/
 
   const teamMemberData = teamMembers.map((teamMember) => {
     return {
       name: teamMember.name,
-      value: getCountForTeamMember(teamMember.id),
+      antal: getCountForTeamMember(teamMember.id),
       color: teamMember.color,
       teamMember: teamMember,
     };
@@ -181,10 +189,10 @@ const Stats: NextPage = () => {
                             />
                           </TableCell>
                           <TableCell>{tmd.name}</TableCell>
-                          <TableCell>{tmd.value}</TableCell>
+                          <TableCell>{tmd.antal}</TableCell>
                           <TableCell>
-                            {tmd.value &&
-                              Math.round(100 * (tmd.value / spottings.length))}
+                            {tmd.antal &&
+                              Math.round(100 * (tmd.antal / spottings.length))}
                             %
                           </TableCell>
                         </TableRow>
@@ -202,11 +210,11 @@ const Stats: NextPage = () => {
                         <Label angle={-90}>Antal sedda</Label>
                       </YAxis>
                       <Tooltip />
-                      <Bar dataKey="value">
+                      <Bar dataKey="antal">
                         {teamMemberData.map((teamMember, index) => (
                           <Cell key={`cell-${index}`} fill={teamMember.color} />
                         ))}
-                        <LabelList dataKey="value" position="top" />
+                        <LabelList dataKey="antal" position="top" />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
