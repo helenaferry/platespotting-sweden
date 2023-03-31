@@ -4,6 +4,7 @@ import { selectAllSpottings } from "../../store/spottingsSlice";
 import classNames from "classnames";
 import Plate from "../plate/Plate";
 import MemberBadge from "../member-badge/MemberBadge";
+import PositionOnMap from "../position-on-map/PositionOnMap";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
@@ -149,9 +150,12 @@ const AllSpottings = () => {
               </div>
             </AccordionSummary>
             <AccordionDetails>
-              <div>[karta]</div>
+              <PositionOnMap
+                lat={spotting.location_lat}
+                lng={spotting.location_lng}
+              />
               <div className="break-all">Anteckning: {spotting.note}</div>
-              <div>
+              <div className="text-right">
                 <IconButton href={"/edit/" + spotting.plateNumber}>
                   <EditIcon className="pointer-events-none" />
                 </IconButton>
