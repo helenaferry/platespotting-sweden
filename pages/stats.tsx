@@ -115,7 +115,7 @@ const Stats: NextPage = () => {
                   </TableHead>
                   <TableBody>
                     {findsPerYear.map((fpy: any) => (
-                      <TableRow>
+                      <TableRow key={fpy.name}>
                         <TableCell>{fpy.name}</TableCell>
                         <TableCell>{fpy.value}</TableCell>
                         <TableCell>
@@ -171,7 +171,7 @@ const Stats: NextPage = () => {
                     </TableHead>
                     <TableBody>
                       {teamMemberData.map((tmd) => (
-                        <TableRow>
+                        <TableRow key={tmd.name}>
                           <TableCell>
                             <MemberBadge
                               name={tmd.name}
