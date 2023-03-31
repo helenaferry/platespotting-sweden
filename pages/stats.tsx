@@ -68,8 +68,8 @@ const Stats: NextPage = () => {
     })
     .reduce(function (acc: any, curr: string) {
       return (
-        acc.findIndex((o) => o.name === curr) > -1
-          ? acc[acc.findIndex((o) => o.name === curr)].value++
+        acc.findIndex((o: any) => o.name === curr) > -1
+          ? acc[acc.findIndex((o: any) => o.name === curr)].value++
           : acc.push({ name: curr, value: 1 }),
         acc
       );
