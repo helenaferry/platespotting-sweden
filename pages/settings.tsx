@@ -162,7 +162,7 @@ const Settings: NextPage = () => {
                             onChange={updateTeamMemberColor}
                           >
                             {colors.map((color, index) => (
-                              <MenuItem value={color}>
+                              <MenuItem value={color} key={index}>
                                 <MemberBadge
                                   color={color}
                                   id={0}
@@ -288,7 +288,7 @@ const Settings: NextPage = () => {
                     onChange={onChangeNewTeamMemberColor}
                   >
                     {colors.map((color, index) => (
-                      <MenuItem value={color}>
+                      <MenuItem value={color} key={index}>
                         <MemberBadge
                           color={color}
                           id={0}
