@@ -37,21 +37,10 @@ const Stats: NextPage = () => {
   const hasTeamMembers = useAppSelector(
     (state) => state.settings.hasTeamMembers
   );
+  const colors = useAppSelector((state) => state.settings.colors);
   const dispatch = useAppDispatch();
   const supabase = useSupabaseClient();
   const teamMembers = useAppSelector(selectAllTeamMembers);
-  const COLORS = [
-    "#D16666",
-    "#4B244A",
-    "#2A7F62",
-    "#FFBF46",
-    "#69899B",
-    "#000000",
-  ];
-  /*
-    !hasTeamMembers || !teamMembers || teamMembers.length == 0
-      ? ["#D16666", "#4B244A", "#2A7F62", "#FFBF46", "#69899B"]
-      : teamMembers.map((tm) => tm.color);*/
 
   const teamMemberData = teamMembers.map((teamMember) => {
     return {
@@ -151,7 +140,7 @@ const Stats: NextPage = () => {
                       {findsPerYear.map((find: any, index: number) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
+                          fill={colors[index % colors.length]}
                         ></Cell>
                       ))}
                     </Pie>

@@ -34,6 +34,11 @@ function MyApp({
         fontSize: 24,
       },
     },
+    palette: {
+      primary: {
+        main: "#0471A6",
+      },
+    },
   });
   theme = responsiveFontSizes(theme);
 

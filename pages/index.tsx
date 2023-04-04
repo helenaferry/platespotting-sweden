@@ -4,6 +4,7 @@ import Plate from "./../components/plate/Plate";
 import Link from "next/link";
 import { useAppSelector } from "./../hooks";
 import { selectNextPlate } from "../store/spottingsSlice";
+import Button from "@mui/material/Button";
 
 const Home: NextPage = () => {
   const nextPlate = useAppSelector(selectNextPlate);
@@ -15,7 +16,7 @@ const Home: NextPage = () => {
         <Plate plateNumber={nextPlate} large={true}></Plate>
         <br />
         <Link href="/add">
-          <button className="btn-primary">Hittad!</button>
+          <Button variant="contained">Hittad!</Button>
         </Link>
       </section>
     </PageTemplate>

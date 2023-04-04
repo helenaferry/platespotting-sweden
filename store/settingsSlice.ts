@@ -5,7 +5,8 @@ interface SettingsState {
     error: string | undefined,
     hasTeamMembers: boolean,
     name: string,
-    email: string
+    email: string,
+    colors: string[]
 }
 
 const initialState: SettingsState = {
@@ -13,7 +14,16 @@ const initialState: SettingsState = {
     error: '',
     hasTeamMembers: false,
     name: '',
-    email: ''
+    email: '',
+    colors: [
+        "#D16666",
+        "#0471A6",
+        "#4B244A",
+        "#2A7F62",
+        "#FFBF46",
+        "#69899B",
+        "#191919",
+    ]
 }
 
 type FetchSettingsType = {
