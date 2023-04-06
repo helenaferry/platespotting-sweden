@@ -1,11 +1,9 @@
 import type { NextPage } from "next";
 import PageTemplate from "./../components/page-template/PageTemplate";
-import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useState } from "react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useAppSelector, useAppDispatch } from "./../hooks";
 import { selectAllSpottings, selectDaysSince } from "./../store/spottingsSlice";
 import { selectAllTeamMembers } from "./../store/teamMemberSlice";
-import { TeamMemberType } from "../types/TeamMemberType";
 import {
   ResponsiveContainer,
   PieChart,
@@ -28,7 +26,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Grid, duration } from "@mui/material";
+import { Grid } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {
   intervalToDuration,
@@ -37,8 +35,6 @@ import {
   format,
   isFuture,
 } from "date-fns";
-import svLocale from "date-fns/locale/sv";
-import { SpottingType } from "../types/SpottingType";
 
 const Stats: NextPage = () => {
   const spottings = useAppSelector(selectAllSpottings);
@@ -65,7 +61,7 @@ const Stats: NextPage = () => {
     const hm = spottings.filter((spotting) =>
       spotting.teamMembers?.find((teamMember) => teamMember.id == id)
     );
-    return hm.length; // TODO improve
+    return hm.length;
   }
 
   const findsPerYear = spottings
