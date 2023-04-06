@@ -167,8 +167,6 @@ const Stats: NextPage = () => {
     return result ? result : 0;
   };
 
-  console.log(percentDone());
-
   const daysLeft = () => {
     const daysPassed: number = totalDurationInDays();
     const donePercent: number = percentDone();
