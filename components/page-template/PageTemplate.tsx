@@ -40,7 +40,7 @@ export default function PageTemplate(props: Props) {
 
   useEffect(() => {
     dispatch(fetchSettings({ id: session?.user.id, database: supabase }));
-  }, [session]);
+  }, [session, dispatch, supabase]);
 
   /* supabase
          .channel('*')

@@ -18,6 +18,7 @@ import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import { SpottingType } from "../../types/SpottingType";
 import { NewOrModifiedSpottingType } from "../../types/NewOrModifiedSpottingType";
@@ -258,9 +259,9 @@ export default function PlateForm(props: PlateFormProps) {
         defaultValue={props.mode == "edit" ? editSpotting?.note : ""}
       />
       {teamMembers.length > 0 && teamMembersSection()}
-      <button type="submit" className="btn-primary" disabled={!canSave}>
+      <Button variant="contained" type="submit" disabled={!canSave}>
         {props.mode == "add" ? "Lägg till" : "Spara ändringar"}
-      </button>
+      </Button>
     </form>
   ) : status == "failed" ? (
     <p>Något gick fel</p>

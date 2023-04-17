@@ -19,6 +19,11 @@ import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Button from "@mui/material/Button";
 
 const Settings: NextPage = () => {
   const supabase = useSupabaseClient();
@@ -33,6 +38,7 @@ const Settings: NextPage = () => {
   const error = useAppSelector((state) => state.spottings.error);
   const teamMemberForm = useRef<HTMLFormElement>(null);
   const [editingTeamMember, setEditingTeamMember] = useState(0);
+  const colors = useAppSelector((state) => state.settings.colors);
 
   const [hasTeam, setHasTeam] = useState(hasTeamMembers);
   const [newName, setNewName] = useState(name);
@@ -56,7 +62,7 @@ const Settings: NextPage = () => {
     setNewTeamMemberName(event.target.value);
   };
 
-  const onChangeNewTeamMemberColor = (event: any) => {
+  const onChangeNewTeamMemberColor = (event: SelectChangeEvent) => {
     setNewTeamMemberColor(event.target.value);
   };
 
@@ -64,7 +70,7 @@ const Settings: NextPage = () => {
     setUpdatedTeamMemberName(event.target.value);
   };
 
-  const updateTeamMemberColor = (event: any) => {
+  const updateTeamMemberColor = (event: SelectChangeEvent) => {
     setUpdatedTeamMemberColor(event.target.value);
   };
 
@@ -144,16 +150,29 @@ const Settings: NextPage = () => {
                   <td className="min-w-[50%]">
                     {editingTeamMember == member.id ? (
                       <div className="flex">
-                        <div>
-                          <label htmlFor="updateTeamMemberColor">Färg</label>
-                          <br />
-                          <input
-                            type="color"
-                            name="updateTeamMemberColor"
-                            onChange={updateTeamMemberColor}
+                        <FormControl sx={{ m: 1, minWidth: 100 }}>
+                          <InputLabel id="updateTeamMemberColorLabel">
+                            Välj...
+                          </InputLabel>
+                          <Select
+                            labelId="updateTeamMemberColorLabel"
+                            id="updateTeamMemberColor"
+                            label="Färg"
                             defaultValue={member.color}
-                          />
-                        </div>
+                            onChange={updateTeamMemberColor}
+                          >
+                            {colors.map((color, index) => (
+                              <MenuItem value={color} key={index}>
+                                <MemberBadge
+                                  color={color}
+                                  id={0}
+                                  name={index + 1 + ""}
+                                  profile=""
+                                ></MemberBadge>
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
                         <TextField
                           id="updateTeamMemberName"
                           defaultValue={member.name}
@@ -233,9 +252,9 @@ const Settings: NextPage = () => {
             label={hasTeam ? "Teamets namn" : "Mitt namn"}
             variant="outlined"
           />
-          <button type="submit" className="btn-primary">
+          <Button type="submit" variant="contained">
             Spara namn
-          </button>
+          </Button>
         </form>
         {hasTeam && (
           <section>
@@ -259,19 +278,31 @@ const Settings: NextPage = () => {
                 variant="outlined"
               />
               <div>
-                <label htmlFor="newTeamMemberColor">
-                  Teammedlemmens favoritfärg
-                </label>
-                <br />
-                <input
-                  type="color"
-                  name="newTeamMemberColor"
-                  onChange={onChangeNewTeamMemberColor}
-                />
+                <p>Teammedlemmens favoritfärg</p>
+                <FormControl sx={{ m: 1, minWidth: 100 }}>
+                  <InputLabel id="newTeamMemberColorLabel">Välj...</InputLabel>
+                  <Select
+                    labelId="newTeamMemberColorLabel"
+                    id="newTeamMemberColor"
+                    label="Färg"
+                    onChange={onChangeNewTeamMemberColor}
+                  >
+                    {colors.map((color, index) => (
+                      <MenuItem value={color} key={index}>
+                        <MemberBadge
+                          color={color}
+                          id={0}
+                          name={index + 1 + ""}
+                          profile=""
+                        ></MemberBadge>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </div>
-              <button type="submit" className="btn-primary">
+              <Button type="submit" variant="contained">
                 Lägg till teammedlem
-              </button>
+              </Button>
             </form>
           </section>
         )}
