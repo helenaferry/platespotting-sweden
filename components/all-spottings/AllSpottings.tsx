@@ -1,10 +1,9 @@
 import { useAppSelector } from "../../hooks";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { selectAllSpottings } from "../../store/spottingsSlice";
 import classNames from "classnames";
 import Plate from "../plate/Plate";
 import MemberBadge from "../member-badge/MemberBadge";
-import PositionOnMap from "../position-on-map/PositionOnMap";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
@@ -14,6 +13,12 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import Button from "@mui/material/Button";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import dynamic from "next/dynamic";
+const PositionOnMap = dynamic(
+  () => import("../position-on-map/PositionOnMap"),
+  { ssr: false }
+);
+
 const AllSpottings = () => {
   const spottings = useAppSelector(selectAllSpottings);
   const hasTeamMembers = useAppSelector(
@@ -120,8 +125,16 @@ const AllSpottings = () => {
                 >
                   <Plate plateNumber={spotting.plateNumber} large={false} />
                 </div>
-                <div>{spotting.dateSpotted} </div>
                 <div>
+                  <p className="text-xs text-slate-400 uppercase">Datum</p>
+                  {spotting.dateSpotted}{" "}
+                </div>
+                <div>
+                  {index != spottings.length - 1 && (
+                    <p className="text-xs text-slate-400 uppercase">
+                      Tidsåtgång
+                    </p>
+                  )}
                   {index >= 0 &&
                     index < spottings.length - 1 &&
                     dayDiff(
@@ -129,24 +142,30 @@ const AllSpottings = () => {
                       spottings[index + 1].dateSpotted
                     )}
                 </div>
-                <div>
-                  {hasTeamMembers && (
-                    <AvatarGroup max={5} className="!justify-end">
-                      {spotting.teamMembers &&
-                        spotting.teamMembers
-                          // .sort((a, b) => a.id - b.id)
-                          .map((tm) => (
-                            <MemberBadge
-                              key={tm.id}
-                              id={tm.id}
-                              name={tm.name}
-                              color={tm.color}
-                              profile={undefined}
-                            />
-                          ))}
-                    </AvatarGroup>
+
+                {hasTeamMembers &&
+                  spotting.teamMembers &&
+                  spotting.teamMembers.length > 0 && (
+                    <div>
+                      <p className="text-xs text-slate-400 uppercase">
+                        Teammedlemmar
+                      </p>
+                      <AvatarGroup max={5} className="!justify-end">
+                        {spotting.teamMembers &&
+                          spotting.teamMembers
+                            //.sort((a, b) => a.id - b.id)
+                            .map((tm) => (
+                              <MemberBadge
+                                key={tm.id}
+                                id={tm.id}
+                                name={tm.name}
+                                color={tm.color}
+                                profile={undefined}
+                              />
+                            ))}
+                      </AvatarGroup>
+                    </div>
                   )}
-                </div>
               </div>
             </AccordionSummary>
             <AccordionDetails>
@@ -154,9 +173,17 @@ const AllSpottings = () => {
                 lat={spotting.location_lat}
                 lng={spotting.location_lng}
               />
-              <div className="break-all">Anteckning: {spotting.note}</div>
-              <div className="text-right">
-                <IconButton href={"/edit/" + spotting.plateNumber}>
+              {spotting.note && (
+                <div className="mt-2 break-all">
+                  <p className="text-xs text-slate-400 uppercase">Anteckning</p>
+                  {spotting.note}
+                </div>
+              )}
+              <div className="text-right mt-2">
+                <IconButton
+                  href={"/edit/" + spotting.plateNumber}
+                  aria-label="Redigera"
+                >
                   <EditIcon className="pointer-events-none" />
                 </IconButton>
               </div>

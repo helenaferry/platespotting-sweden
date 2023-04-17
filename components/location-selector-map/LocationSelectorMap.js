@@ -1,8 +1,6 @@
 
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet'
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
-import 'leaflet/dist/leaflet.css'
-import 'node_modules/leaflet-geosearch/dist/geosearch.css'
 import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 
 export default function LocationSelectorMap(props) {
