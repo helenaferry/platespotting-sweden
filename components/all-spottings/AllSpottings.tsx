@@ -175,12 +175,20 @@ const AllSpottings = () => {
                 show={expanded.has("accordion" + spotting.plateNumber)}
               />
               {spotting.note && (
-                <div className="mt-2 break-words">
-                  <p className="text-xs text-slate-400 uppercase">Anteckning</p>
-                  {spotting.note}
+                <div className="break-words">
+                  <p className="mt-4 text-xs text-slate-400 uppercase">
+                    Anteckning
+                  </p>
+                  {spotting.note.split("\n").map(function (item, index) {
+                    return (
+                      <p className={classNames({ "mt-2": index > 0 })}>
+                        {item}
+                      </p>
+                    );
+                  })}
                 </div>
               )}
-              <div className="text-right mt-2">
+              <div className="text-right">
                 <IconButton
                   href={"/edit/" + spotting.plateNumber}
                   aria-label="Redigera"
