@@ -1,7 +1,11 @@
-import { LocationType } from "./../../types/LocationType";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import { useState, useEffect } from "react";
-export default function PositionOnMap(props: LocationType) {
+type PositionOnMapType = {
+  show: boolean;
+  lat: number;
+  lng: number;
+};
+export default function PositionOnMap(props: PositionOnMapType) {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
@@ -10,7 +14,7 @@ export default function PositionOnMap(props: LocationType) {
   return (
     <div>
       <div className="h-64 w-full border">
-        {isMounted && (
+        {isMounted && props.show && (
           <MapContainer
             className="h-64 w-full"
             center={[props.lat, props.lng]}

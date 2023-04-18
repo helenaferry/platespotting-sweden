@@ -172,6 +172,7 @@ const AllSpottings = () => {
               <PositionOnMap
                 lat={spotting.location_lat}
                 lng={spotting.location_lng}
+                show={expanded.has("accordion" + spotting.plateNumber)}
               />
               {spotting.note && (
                 <div className="mt-2 break-all">
