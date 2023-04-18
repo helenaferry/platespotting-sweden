@@ -175,7 +175,7 @@ const AllSpottings = () => {
                 show={expanded.has("accordion" + spotting.plateNumber)}
               />
               {spotting.note && (
-                <div className="mt-2 break-all">
+                <div className="mt-2 break-words">
                   <p className="text-xs text-slate-400 uppercase">Anteckning</p>
                   {spotting.note}
                 </div>
