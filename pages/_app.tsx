@@ -2,6 +2,8 @@ import "../styles/tailwind.css";
 import type { AppProps } from "next/app";
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { SessionContextProvider, Session } from "@supabase/auth-helpers-react";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import React, { useState } from "react";
 import { Provider } from "react-redux";
 import store from "./../store/store";
@@ -50,9 +52,11 @@ function MyApp({
       initialSession={pageProps.initialSession}
     >
       <Provider store={store}>
-        <ThemeProvider theme={theme}>
-          <Component {...pageProps} />
-        </ThemeProvider>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <ThemeProvider theme={theme}>
+            <Component {...pageProps} />
+          </ThemeProvider>
+        </LocalizationProvider>
       </Provider>
     </SessionContextProvider>
   );
