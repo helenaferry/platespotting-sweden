@@ -181,14 +181,17 @@ const AllSpottings = () => {
                   </p>
                   {spotting.note.split("\n").map(function (item, index) {
                     return (
-                      <p className={classNames({ "mt-2": index > 0 })}>
+                      <p
+                        key={index}
+                        className={classNames({ "mt-2": index > 0 })}
+                      >
                         {item}
                       </p>
                     );
                   })}
                 </div>
               )}
-              <div className="text-right">
+              <div className="text-right mt-2">
                 <IconButton
                   href={"/edit/" + spotting.plateNumber}
                   aria-label="Redigera"

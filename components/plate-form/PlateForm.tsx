@@ -1,5 +1,5 @@
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/router";
 import Plate from "./../plate/Plate";
 import { LocationType } from "./../../types/LocationType";
@@ -13,6 +13,7 @@ import {
 import { selectAllTeamMembers } from "./../../store/teamMemberSlice";
 import dynamic from "next/dynamic";
 import { TeamMemberType } from "../../types/TeamMemberType";
+import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
@@ -20,8 +21,11 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DateValidationError } from "@mui/x-date-pickers/models";
 import { SpottingType } from "../../types/SpottingType";
 import { NewOrModifiedSpottingType } from "../../types/NewOrModifiedSpottingType";
+import { format } from "date-fns";
 
 const LocationSelectorMap = dynamic(
   () => import("./../location-selector-map/LocationSelectorMap.js"),
@@ -36,7 +40,7 @@ type PlateFormProps = {
 export default function PlateForm(props: PlateFormProps) {
   const session = useSession();
   const router = useRouter();
-  const todayString = getTodayString();
+  const todayString = format(new Date(), "yyyy-MM-dd");
   const teamMembers = useAppSelector(selectAllTeamMembers);
   const [note, setNote] = useState("");
   const [date, setDate] = useState(todayString);
@@ -44,6 +48,7 @@ export default function PlateForm(props: PlateFormProps) {
     (TeamMemberType | undefined)[] | undefined
   >([]);
   const [membersSeenUpdated, setMembersSeenUpdated] = useState(false);
+  const [dateValid, setDateValid] = useState(true);
   const [location_lat, setLat] = useState(0);
   const [location_lng, setLng] = useState(0);
   const dispatch = useAppDispatch();
@@ -53,10 +58,29 @@ export default function PlateForm(props: PlateFormProps) {
   const [addSpottingStatus, setAddSpottingStatus] = useState("idle");
   const spottings = useAppSelector(selectAllSpottings);
   let editSpotting: SpottingType | undefined;
+  let previousSpotting: SpottingType | undefined;
+  let nextSpotting: SpottingType | undefined;
+  const [error, setError] = useState<DateValidationError | null>(null);
+  const datePickerRef = useRef(null);
 
   if (props.mode == "edit" && props.plateNumber && props.plateNumber > 0) {
     editSpotting = spottings.find(
       (spotting) => spotting.plateNumber == props.plateNumber
+    );
+    if (props.plateNumber > 1) {
+      previousSpotting = spottings.find(
+        (spotting) => spotting.plateNumber == (props.plateNumber || 1) - 1
+      );
+    }
+  } else if (props.mode == "add") {
+    previousSpotting = spottings.find(
+      (spotting) => spotting.plateNumber == nextPlate - 1
+    );
+  }
+
+  if (props.plateNumber && props.plateNumber < spottings.length) {
+    nextSpotting = spottings.find(
+      (spotting) => spotting.plateNumber == (props.plateNumber || 1) + 1
     );
   }
 
@@ -67,12 +91,40 @@ export default function PlateForm(props: PlateFormProps) {
     }
   }, [editSpotting]);
 
-  const onChangeNote = (event: any) => {
-    setNote(event.target.value);
+  const onChangeDate = (value: Date | null, context: any) => {
+    if (context.validationError || !value) {
+      setDateValid(false);
+      return;
+    } else {
+      setDateValid(true);
+    }
+    setDate(format(value, "yyyy-MM-dd"));
   };
 
-  const onChangeDate = (event: any) => {
-    setDate(event.target.value);
+  const errorMessage = useMemo(() => {
+    switch (error) {
+      case "maxDate": {
+        return "Datumet kan inte vara efter att du såg nästa nummerskylt.";
+      }
+      case "minDate": {
+        return "Datumet kan inte vara innan du såg den förra nummerskylten.";
+      }
+      case "disableFuture": {
+        return "Datumet kan inte vara i framtiden.";
+      }
+      case "invalidDate": {
+        return "Ogiltigt datum";
+      }
+
+      default: {
+        return "";
+      }
+    }
+  }, [error]);
+
+  const onChangeNote = (event: any) => {
+    console.log(datePickerRef.current);
+    setNote(event.target.value);
   };
 
   const onChangeMembersSeen = () => {
@@ -117,20 +169,10 @@ export default function PlateForm(props: PlateFormProps) {
     }
   };
 
-  function getTodayString() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth() + 1;
-    const day = today.getDate();
-    const monthString = month < 10 ? "0" + month : month;
-    const dayString = day < 10 ? "0" + day : day;
-    return year + "-" + monthString + "-" + dayString;
-  }
-
   const canSave = addSpottingStatus === "idle";
 
   async function addSpotting(spotting: NewOrModifiedSpottingType) {
-    if (canSave) {
+    if (canSave && dateValid) {
       setAddSpottingStatus("pending");
       await dispatch(addNewSpotting(spotting));
       setAddSpottingStatus("idle");
@@ -186,7 +228,7 @@ export default function PlateForm(props: PlateFormProps) {
   };
 
   return status == "succeeded" && addSpottingStatus == "idle" ? (
-    <form onSubmit={onSubmit} className="flex flex-col gap-8">
+    <Box component="form" onSubmit={onSubmit} className="flex flex-col gap-8">
       <div className="text-center">
         {props.mode == "add" && <p>Lägg till observation för:</p>}
         {props.mode == "edit" && <p>Redigera observation för:</p>}
@@ -201,15 +243,25 @@ export default function PlateForm(props: PlateFormProps) {
           large={true}
         />
       </div>
-      <TextField
-        type="date"
-        id="date"
-        defaultValue={
-          props.mode == "add" ? todayString : editSpotting?.dateSpotted
-        }
+      <DatePicker
+        ref={datePickerRef}
+        format="yyyy-MM-dd"
         onChange={onChangeDate}
         label="Datum"
-        variant="outlined"
+        disableFuture
+        defaultValue={
+          props.mode == "add"
+            ? new Date(todayString)
+            : editSpotting && new Date(editSpotting?.dateSpotted)
+        }
+        minDate={previousSpotting && new Date(previousSpotting.dateSpotted)}
+        maxDate={nextSpotting && new Date(nextSpotting.dateSpotted)}
+        onError={(newError) => setError(newError)}
+        slotProps={{
+          textField: {
+            helperText: errorMessage,
+          },
+        }}
       />
       <div>
         <p>
@@ -259,10 +311,14 @@ export default function PlateForm(props: PlateFormProps) {
         defaultValue={props.mode == "edit" ? editSpotting?.note : ""}
       />
       {teamMembers.length > 0 && teamMembersSection()}
-      <Button variant="contained" type="submit" disabled={!canSave}>
+      <Button
+        variant="contained"
+        type="submit"
+        disabled={!canSave || !dateValid}
+      >
         {props.mode == "add" ? "Lägg till" : "Spara ändringar"}
       </Button>
-    </form>
+    </Box>
   ) : status == "failed" ? (
     <p>Något gick fel</p>
   ) : (
