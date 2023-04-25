@@ -2,6 +2,7 @@
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet'
 import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
+import MapPlaceholder from '../map-placeholder/MapPlaceholder';
 
 export default function LocationSelectorMap(props) {
   const markerRef = useRef(null)
@@ -105,6 +106,6 @@ export default function LocationSelectorMap(props) {
     <DraggableMarker />
     <LeafletgeoSearch />
   </MapContainer>
-    : <p>Väntar på kartan... Har du gett tillåtelse i webbläsaren att läsa position?</p>
+    : <MapPlaceholder/>
   }</div>);
 }

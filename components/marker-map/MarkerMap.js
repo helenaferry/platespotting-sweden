@@ -7,6 +7,7 @@ import { selectAllSpottings } from './../../store/spottingsSlice'
 import Plate from './../plate/Plate'
 import MemberBadge from './../member-badge/MemberBadge'
 import AvatarGroup from '@mui/material/AvatarGroup';
+import MapPlaceholder from '../map-placeholder/MapPlaceholder';
 
 export default function MarkerMap() {
     const spottings = useAppSelector(selectAllSpottings)
@@ -99,6 +100,6 @@ export default function MarkerMap() {
             </Popup>
         </Marker>)}
     </MapContainer>
-        : <p>Väntar på kartan... Har du gett tillåtelse i webbläsaren att läsa position?</p>
+        : <MapPlaceholder/>
     }</div>);
 }
