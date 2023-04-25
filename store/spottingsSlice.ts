@@ -36,7 +36,8 @@ export const fetchSpottings = createAsyncThunk('spottings/fetchSpottings', async
             teamMembers(
                     name,
                     color,
-                    id
+                    id,
+                    deleted
                 )
         `)
         .order('plateNumber', { ascending: false })

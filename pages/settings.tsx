@@ -5,9 +5,10 @@ import MemberBadge from "./../components/member-badge/MemberBadge";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useAppSelector, useAppDispatch } from "./../hooks";
 import {
-  selectAllTeamMembers,
+  selectAllTeamMembersInclDeleted,
   addNewTeamMember,
   updateTeamMember,
+  deleteOrUndeleteTeamMember,
 } from "./../store/teamMemberSlice";
 import { setHasTeamMembers, setName } from "../store/settingsSlice";
 import TextField from "@mui/material/TextField";
@@ -24,6 +25,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Button from "@mui/material/Button";
+import classNames from "classnames";
 
 const Settings: NextPage = () => {
   const supabase = useSupabaseClient();
@@ -33,7 +35,7 @@ const Settings: NextPage = () => {
     (state) => state.settings.hasTeamMembers
   );
   const name = useAppSelector((state) => state.settings.name);
-  const teamMembers = useAppSelector(selectAllTeamMembers);
+  const teamMembers = useAppSelector(selectAllTeamMembersInclDeleted);
   const status = useAppSelector((state) => state.settings.status);
   const error = useAppSelector((state) => state.spottings.error);
   const teamMemberForm = useRef<HTMLFormElement>(null);
@@ -109,9 +111,24 @@ const Settings: NextPage = () => {
     );
   };
 
-  const deleteTeamMember = () => {
-    console.log("TBD delete");
-    alert("TBD delete");
+  const onDeleteTeamMember = (event: any) => {
+    dispatch(
+      deleteOrUndeleteTeamMember({
+        id: event.target.value,
+        deleted: true,
+        database: supabase,
+      })
+    );
+  };
+
+  const onUnDeleteTeamMember = (event: any) => {
+    dispatch(
+      deleteOrUndeleteTeamMember({
+        id: event.target.value,
+        deleted: false,
+        database: supabase,
+      })
+    );
   };
 
   async function addTeamMember() {
@@ -122,6 +139,7 @@ const Settings: NextPage = () => {
           color: newTeamMemberColor,
           profile: session?.user.id,
           id: 0,
+          deleted: false,
         },
         database: supabase,
       })
@@ -168,6 +186,7 @@ const Settings: NextPage = () => {
                                   id={0}
                                   name={index + 1 + ""}
                                   profile=""
+                                  deleted={false}
                                 ></MemberBadge>
                               </MenuItem>
                             ))}
@@ -182,14 +201,36 @@ const Settings: NextPage = () => {
                         />
                       </div>
                     ) : (
-                      <div className="flex gap-2 my-2">
+                      <div
+                        className={classNames(
+                          "flex",
+                          "gap-2",
+                          "my-2",
+                          "items-center",
+                          {
+                            "text-slate-300": member.deleted,
+                          }
+                        )}
+                      >
                         <MemberBadge
                           name={member.name}
                           color={member.color}
                           profile={member.profile}
                           id={member.id}
+                          deleted={member.deleted}
                         />
-                        {member.name}
+                        {member.name}{" "}
+                        {member.deleted && (
+                          <>
+                            BORTTAGEN{" "}
+                            <Button
+                              onClick={onUnDeleteTeamMember}
+                              value={member.id}
+                            >
+                              Återta?
+                            </Button>
+                          </>
+                        )}
                       </div>
                     )}
                   </td>
@@ -203,18 +244,22 @@ const Settings: NextPage = () => {
                       </IconButton>
                     ) : (
                       <div className="flex justify-end">
-                        <IconButton
-                          onClick={deleteTeamMember}
-                          value={member.id}
-                        >
-                          <DeleteIcon className="pointer-events-none" />
-                        </IconButton>
-                        <IconButton
-                          onClick={onChangeEditingTeamMember}
-                          value={member.id}
-                        >
-                          <EditIcon className="pointer-events-none" />
-                        </IconButton>
+                        {!member.deleted && (
+                          <>
+                            <IconButton
+                              onClick={onDeleteTeamMember}
+                              value={member.id}
+                            >
+                              <DeleteIcon className="pointer-events-none" />
+                            </IconButton>
+                            <IconButton
+                              onClick={onChangeEditingTeamMember}
+                              value={member.id}
+                            >
+                              <EditIcon className="pointer-events-none" />
+                            </IconButton>
+                          </>
+                        )}
                       </div>
                     )}
                   </td>
@@ -294,6 +339,7 @@ const Settings: NextPage = () => {
                           id={0}
                           name={index + 1 + ""}
                           profile=""
+                          deleted={false}
                         ></MemberBadge>
                       </MenuItem>
                     ))}

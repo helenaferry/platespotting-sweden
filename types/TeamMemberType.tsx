@@ -3,4 +3,5 @@ export type TeamMemberType = {
   name: string;
   color: string;
   profile: string | undefined;
+  deleted: boolean;
 };

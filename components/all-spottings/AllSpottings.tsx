@@ -145,14 +145,17 @@ const AllSpottings = () => {
 
                 {hasTeamMembers &&
                   spotting.teamMembers &&
-                  spotting.teamMembers.length > 0 && (
+                  spotting.teamMembers.filter((tm) => !tm.deleted).length >
+                    0 && (
                     <div>
                       <p className="text-xs text-slate-400 uppercase">
                         Teammedlemmar
                       </p>
+
                       <AvatarGroup max={5} className="!justify-end">
                         {spotting.teamMembers &&
                           spotting.teamMembers
+                            .filter((tm) => !tm.deleted)
                             //.sort((a, b) => a.id - b.id)
                             .map((tm) => (
                               <MemberBadge
@@ -161,6 +164,7 @@ const AllSpottings = () => {
                                 name={tm.name}
                                 color={tm.color}
                                 profile={undefined}
+                                deleted={tm.deleted}
                               />
                             ))}
                       </AvatarGroup>

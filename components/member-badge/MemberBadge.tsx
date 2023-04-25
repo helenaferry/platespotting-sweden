@@ -3,10 +3,6 @@ import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 
 export default function MemberBadge(props: TeamMemberType) {
-  const backgroundStyle = {
-    backgroundColor: props.color,
-    color: wc_hex_is_light(props.color) ? "#000000" : "#FFFFFF",
-  };
   function wc_hex_is_light(color: string) {
     const hex = color.replace("#", "");
     const c_r = parseInt(hex.substr(0, 2), 16);
@@ -20,8 +16,12 @@ export default function MemberBadge(props: TeamMemberType) {
       <Avatar
         key={props.id}
         sx={{
-          color: wc_hex_is_light(props.color) ? "#000000" : "#FFFFFF",
-          bgcolor: props.color,
+          color: props.deleted
+            ? "#CCCCCC"
+            : wc_hex_is_light(props.color)
+            ? "#000000"
+            : "#FFFFFF",
+          bgcolor: props.deleted ? "#EEEEEE" : props.color,
           width: 24,
           height: 24,
         }}

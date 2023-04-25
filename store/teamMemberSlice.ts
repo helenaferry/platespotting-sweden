@@ -29,7 +29,6 @@ type AddNewTeamMemberType = {
 }
 
 export const addNewTeamMember = createAsyncThunk('teamMembers/addNewTeamMember', async (prop: AddNewTeamMemberType) => {
-    console.log('teamMemberSlice to add ', prop.teamMember);
     const { data, error } = await prop.database
         .from('teamMembers')
         .insert(
@@ -56,6 +55,23 @@ export const updateTeamMember = createAsyncThunk('teamMembers/updateTeamMember',
         .select()
     if (error) {
         console.log(error)
+    }
+    return data;
+})
+
+type DeleteOrUndeleteTeamMemberType = {
+    id: number,
+    deleted: boolean,
+    database: any
+}
+export const deleteOrUndeleteTeamMember = createAsyncThunk('teamMembers/deleteTeamMember', async (prop: DeleteOrUndeleteTeamMemberType) => {
+    const { data, error } = await prop.database
+        .from('teamMembers')
+        .update({ deleted: prop.deleted })
+        .eq('id', prop.id)
+        .select()
+    if (error) {
+        console.log(error);
     }
     return data;
 })
@@ -121,11 +137,30 @@ export const teamMembersSlice = createSlice({
                 state.error = action.error.message || '';
                 console.log('failed', action.error.message)
             })
+            // Delete or undelete team member
+            .addCase(deleteOrUndeleteTeamMember.pending, (state, action) => {
+                state.status = 'loading'
+                console.log('loading');
+            })
+            .addCase(deleteOrUndeleteTeamMember.fulfilled, (state, action: PayloadAction<any>) => {
+                state.status = 'succeeded'
+                console.log('succeeded', action.payload);
+                if (!action.payload) return
+                const editedTm = action.payload[0];
+                const index = state.teamMembers.findIndex(tm => tm.id === editedTm.id);
+                if (index < 0) return;
+                state.teamMembers[index] = editedTm;
+            })
+            .addCase(deleteOrUndeleteTeamMember.rejected, (state, action) => {
+                state.status = 'failed'
+                state.error = action.error.message || '';
+                console.log('failed', action.error.message)
+            })
     }
 })
 
-// export const { findTeamMember } = teamMembersSlice.actions
+export const selectAllTeamMembers = (state: RootState) => [...state.teamMembers.teamMembers].sort((a, b) => a.id - b.id).filter(teamMember => !teamMember.deleted)
 
-export const selectAllTeamMembers = (state: RootState) => [...state.teamMembers.teamMembers].sort((a, b) => a.id - b.id)
+export const selectAllTeamMembersInclDeleted = (state: RootState) => [...state.teamMembers.teamMembers].sort((a, b) => a.id - b.id)
 
 export default teamMembersSlice.reducer
