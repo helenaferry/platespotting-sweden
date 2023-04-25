@@ -19,8 +19,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "components/location-selector-map/LocationSelectorMap.js",
-    "components/location-selector-map/LocationSelectorMap.js",
+    "components/location-selector-map/LocationSelectorMap.tsx",
+    "components/location-selector-map/LocationSelectorMap.tsx",
     "pages/_document.js",
     "pages/_document.js"
   ],
