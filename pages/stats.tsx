@@ -315,7 +315,8 @@ const Stats: NextPage = () => {
                                 color={tmd.color}
                                 id={tmd.teamMember.id}
                                 profile={tmd.teamMember.profile}
-                              />
+                                deleted={tmd.teamMember.deleted}
+                              ></MemberBadge>
                             </TableCell>
                             <TableCell>{tmd.name}</TableCell>
                             <TableCell>{tmd.antal}</TableCell>
