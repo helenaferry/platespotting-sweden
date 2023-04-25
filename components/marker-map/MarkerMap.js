@@ -86,7 +86,7 @@ export default function MarkerMap() {
                     <Plate plateNumber={spotting.plateNumber} large={false} /><br />
                     {spotting.dateSpotted}<br />
                     {hasTeamMembers && <AvatarGroup max={5}>
-                        {spotting.teamMembers && spotting.teamMembers.map(tm =>
+                        {spotting.teamMembers && spotting.teamMembers.filter(tm => !tm.deleted).map(tm =>
                             <MemberBadge
                                 key={tm.id}
                                 id={tm.id}
