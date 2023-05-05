@@ -7,7 +7,6 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react'
 
 interface SpottingsState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed',
-    teamMemberStatus: 'idle' | 'loading' | 'succeeded' | 'failed',
     loading: boolean,
     spottings: SpottingType[],
     teamMembers: TeamMemberType[],
@@ -16,7 +15,6 @@ interface SpottingsState {
 
 const initialState: SpottingsState = {
     status: 'idle',
-    teamMemberStatus: 'idle',
     loading: false,
     spottings: [],
     teamMembers: [],
@@ -120,6 +118,27 @@ export const updateSpotting = createAsyncThunk("spottings/updateSpotting",
 
     })
 
+export const deleteSpotting = createAsyncThunk("spottings/deleteSpotting", async (prop: NewOrModifiedSpottingType) => {
+    const { stmData, stmError } = await prop.database
+        .from('spottingTeamMembers')
+        .delete()
+        .eq('spotting', prop.spotting.id)
+
+    if (stmError) {
+        console.log(stmError);
+        return;
+    }
+
+    const { data, error } = await prop.database
+        .from('spottings')
+        .delete()
+        .eq('id', prop.spotting.id).select();
+    if (error) {
+        console.log(error);
+    }
+    return data;
+})
+
 export const spottingsSlice = createSlice({
     name: 'spottings',
     initialState,
@@ -174,6 +193,24 @@ export const spottingsSlice = createSlice({
             })
             .addCase(updateSpotting.rejected, (state, action) => {
                 console.log('updateSpotting failed', action.error.message);
+                state.status = 'failed'
+                state.error = action.error.message || '';
+            })
+            // Delete spotting
+            .addCase(deleteSpotting.pending, (state, action) => {
+                state.status = 'loading'
+            })
+            .addCase(deleteSpotting.fulfilled, (state, action: PayloadAction<any>) => {
+                state.status = 'succeeded'
+                if (!action.payload) return
+                const deletedSpotting = action.payload[0];
+                if (!deletedSpotting) return;
+                const index = state.spottings.findIndex(spotting => spotting.plateNumber === deletedSpotting.plateNumber);
+                if (index < 0) return;
+                state.spottings.splice(index, 1);
+            })
+            .addCase(deleteSpotting.rejected, (state, action) => {
+                console.log('deleteSpotting failed', action.error.message);
                 state.status = 'failed'
                 state.error = action.error.message || '';
             })

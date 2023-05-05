@@ -9,6 +9,7 @@ import {
   addNewSpotting,
   selectAllSpottings,
   updateSpotting,
+  deleteSpotting,
 } from "./../../store/spottingsSlice";
 import { selectAllTeamMembers } from "./../../store/teamMemberSlice";
 import dynamic from "next/dynamic";
@@ -26,6 +27,12 @@ import { DateValidationError } from "@mui/x-date-pickers/models";
 import { SpottingType } from "../../types/SpottingType";
 import { NewOrModifiedSpottingType } from "../../types/NewOrModifiedSpottingType";
 import { format } from "date-fns";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 
 const LocationSelectorMap = dynamic(
   () => import("./../location-selector-map/LocationSelectorMap.js"),
@@ -62,6 +69,7 @@ export default function PlateForm(props: PlateFormProps) {
   let nextSpotting: SpottingType | undefined;
   const [error, setError] = useState<DateValidationError | null>(null);
   const datePickerRef = useRef(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
 
   if (props.mode == "edit" && props.plateNumber && props.plateNumber > 0) {
     editSpotting = spottings.find(
@@ -187,6 +195,29 @@ export default function PlateForm(props: PlateFormProps) {
     //setAddSpottingStatus("idle");
     router.push("/list");
     //}
+  }
+
+  const onOpenDeleteConfirm = () => {
+    setDeleteConfirmOpen(true);
+  };
+
+  const onCloseDeleteConfirm = () => {
+    setDeleteConfirmOpen(false);
+  };
+
+  async function onDeleteSpotting() {
+    if (!editSpotting || editSpotting.plateNumber != nextPlate - 1) {
+      console.log("Kan ej ta bort");
+      return;
+    }
+    const spotting = {
+      spotting: editSpotting,
+      database: supabase,
+      membersSeenUpdated: false,
+      membersSeen: [],
+    };
+    await dispatch(deleteSpotting(spotting));
+    router.push("/list");
   }
 
   function updateLocationHandler(data: LocationType) {
@@ -318,6 +349,43 @@ export default function PlateForm(props: PlateFormProps) {
       >
         {props.mode == "add" ? "Lägg till" : "Spara ändringar"}
       </Button>
+      {props.mode == "edit" && editSpotting?.plateNumber == nextPlate - 1 && (
+        <div className="flex flex-col">
+          <Button
+            variant="outlined"
+            type="button"
+            color="error"
+            onClick={onOpenDeleteConfirm}
+          >
+            <DeleteIcon fontSize="small" className="mr-1" /> Ta bort denna
+            observation
+          </Button>
+          <p className="my-2 italic text-sm">
+            Obs! Det går endast att ta bort den senast tillagda observationen.
+          </p>
+          <Dialog
+            open={deleteConfirmOpen}
+            onClose={onCloseDeleteConfirm}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">
+              {"Vill du verkligen ta bort observationen för nummerplåten?"}
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Du kan inte ångra detta.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={onCloseDeleteConfirm}>Avbryt</Button>
+              <Button onClick={onDeleteSpotting} autoFocus>
+                Ta bort denna observation
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </div>
+      )}
     </Box>
   ) : status == "failed" ? (
     <p>Något gick fel</p>
